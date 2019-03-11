@@ -19,11 +19,11 @@ void GoToBall(int x, int y, int d)
   }
   if(cx!=x){
     if(cx<x){
-      turn(90, right);
+      turn(0);
       forward(x-cx);
     }
     else if(cx>x){
-      turn(90, left);
+      turn(1);
       forward(cx-x);
     }
   
