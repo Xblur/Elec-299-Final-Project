@@ -1,5 +1,3 @@
-//HERMANN WAS HERE:)
-
 void setup() {
   // put your setup code here, to run once:
   
@@ -32,7 +30,8 @@ void GoToBall(int x, int y, int d)
   }
   if(cd!=d){
       if(abs(cd-d) == 2){
-        turn(1,1);
+        turn(1);
+        turn(1);
       }
       else if(cd-d ==-3){
         turn (1);
@@ -40,7 +39,7 @@ void GoToBall(int x, int y, int d)
       else if(cd-d ==3){
         turn (0);
       }
-      else if(cd-d >0)
+      else if(cd-d>0)
       {
         turn(1);
       }
@@ -92,7 +91,7 @@ void forward(int numOfIntersections){
   analogWrite(rightSpeed, 0);
 }
 
-void turn(int dir){
+void turn(int dir){//dir = 1 is left, dir = 0 is right
   
   delay(50);
   analogWrite(leftSpeed, 128);
@@ -131,4 +130,3 @@ void turn(int dir){
     analogWrite(leftSpeed, 0);
     analogWrite(rightSpeed, 0);
 }
-
