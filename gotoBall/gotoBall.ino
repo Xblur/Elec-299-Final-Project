@@ -142,3 +142,39 @@ void turn(int dir){
     analogWrite(leftSpeed, 0);
     analogWrite(rightSpeed, 0);
 }
+
+void approach(){
+  while(IRVal <680)
+  {
+    lVal = analogRead(lIRPin);
+    cVal = analogRead(cIRPin);
+    rVal = analogRead(rIRPin);
+
+     /*  Serial.print(lVal);
+      Serial.print(" || ");
+      Serial.print(cVal);
+       Serial.print(" || ");
+       Serial.println(rVal); */
+    if((lVal < thresh) && (cVal > thresh) && (rVal < thresh)){ //SET MOTORS TO DRIVE FORWARD
+      analogWrite(leftSpeed, 110);
+      analogWrite(rightSpeed, 100);
+    }else if((lVal > thresh) && (cVal < thresh) && (rVal < thresh)){//LEANING INTO THE RIGHT...SPEED UP RIGHT MOTOR (CALIBRATE)
+      analogWrite(leftSpeed, 100);
+      analogWrite(rightSpeed, 140);
+    }else if((lVal < thresh) && (cVal < thresh) && (rVal > thresh)){//LEANING INTO THE LEFT...SPEED UP RIGHT MOTOR (CALIBRATE)
+      analogWrite(leftSpeed, 160);
+      analogWrite(rightSpeed, 80);
+    }
+
+    if((lVal > thresh) && (cVal > thresh) && (rVal > thresh) && (plVal > thresh) && (pcVal > thresh) && (prVal > thresh)){ //At an intersection. Increment intersection counter
+      //Serial.print("INTERSECTION");
+      intersectionCount++;
+      delay(100);
+    }
+     plVal = lVal;
+     pcVal = cVal;
+     prVal = rVal;
+  }
+   analogWrite(leftSpeed, 0);
+  analogWrite(rightSpeed, 0);
+}
