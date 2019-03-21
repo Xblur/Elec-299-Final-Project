@@ -1,14 +1,68 @@
-int cy, cx, cd
-cd = 0;
+int cy = 0;
+int cx = 2;
+int cd = 0;
+
+int IRpin = A5;
+
+int lIRPin = A1;
+int cIRPin = A2;
+int rIRPin = A0;
+
+int lVal = 0;
+int cVal = 0;
+int rVal = 0;
+
+int plVal = 0;
+int pcVal = 0;
+int prVal = 0;
+
+int leftSpeed = 5;
+int leftDirection = 4;
+int rightSpeed = 6;
+int rightDirection = 7;
+int thresh = 750;
+int lastInter = 0;
+int IRVal =0;
+
+
+//---------------------------------
+
+int pan = 8;
+int tilt = 9;
+int grip = 10;
+
 
 void setup() {
   // put your setup code here, to run once:
+  pinMode(tilt, OUTPUT);
+  pinMode(pan, OUTPUT);
+  pinMode(grip, OUTPUT);
+
+
+
+
   
+  // put your setup code here, to run once:
+  pinMode(lIRPin, INPUT);
+  pinMode(cIRPin, INPUT);
+  pinMode(rIRPin, INPUT);
+
+  pinMode(leftSpeed,  OUTPUT);
+  pinMode(leftDirection, OUTPUT);
+  pinMode(rightSpeed, OUTPUT);
+  pinMode(rightDirection, OUTPUT);
+
+  pinMode(IRpin, INPUT);
+
+  Serial.begin(9600);
 
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
+  GoToBall(1,5,3);
+  delay(10000);
+  
 
 }
 
@@ -18,16 +72,20 @@ void GoToBall(int x, int y, int d)
   if (cy<y){ //if current y coordinate is less than the objective y then move forward until current y is equal to that of the objective
     forward(y-cy);
     cy = y;
+    Serial.println("Done with Y");
  
   }
   if(cx!=x){ //if the objective is not directly infront of the robot then turn in the direction of the ball and go forward until the ball is in front of the robot
     if(cx<x){
       turn(0);
       forward(x-cx);
+      cx = x;
     }
     else if(cx>x){
+      Serial.println("I will turn Left");
       turn(1);
       forward(cx-x);
+      cx = x;
     }
   
   }
@@ -51,8 +109,13 @@ void GoToBall(int x, int y, int d)
         turn(0);
       }
     }
+   // approach();
       
 }
+
+
+
+
 
 //Function to move robot forward a specified number of intersections
 void forward(int numOfIntersections){
@@ -83,9 +146,14 @@ void forward(int numOfIntersections){
     }
 
     if((lVal > thresh) && (cVal > thresh) && (rVal > thresh) && (plVal > thresh) && (pcVal > thresh) && (prVal > thresh)){ //At an intersection. Increment intersection counter
-      //Serial.print("INTERSECTION");
-      intersectionCount++;
-      delay(100);
+      if((millis()-lastInter)>200){
+        Serial.println("INTERSECTION");
+        
+        intersectionCount++;
+        Serial.println(intersectionCount);
+        lastInter = millis();
+        
+      }
     }
      plVal = lVal;
      pcVal = cVal;
@@ -110,7 +178,7 @@ void turn(int dir){
      analogWrite(rightSpeed, 100);
      digitalWrite(leftDirection, LOW);
      digitalWrite(rightDirection, HIGH);
-     delay(100);
+     delay(200);
      if(cd ==0){ //Update direction robot is facing
       cd =3;
      }else{
@@ -122,7 +190,7 @@ void turn(int dir){
      analogWrite(rightSpeed, 100);
      digitalWrite(leftDirection, HIGH);
      digitalWrite(rightDirection, LOW);
-     delay(100);
+     delay(200);
      cd = (cd+1)%4; //Update direction robot is facing
   }
    cVal = analogRead(cIRPin);
@@ -143,18 +211,18 @@ void turn(int dir){
     analogWrite(rightSpeed, 0);
 }
 
+
 void approach(){
+  IRVal = analogRead(IRpin);
   while(IRVal <680)
   {
+    IRVal = analogRead(IRpin);
+
     lVal = analogRead(lIRPin);
     cVal = analogRead(cIRPin);
     rVal = analogRead(rIRPin);
 
-     /*  Serial.print(lVal);
-      Serial.print(" || ");
-      Serial.print(cVal);
-       Serial.print(" || ");
-       Serial.println(rVal); */
+     
     if((lVal < thresh) && (cVal > thresh) && (rVal < thresh)){ //SET MOTORS TO DRIVE FORWARD
       analogWrite(leftSpeed, 110);
       analogWrite(rightSpeed, 100);
@@ -166,15 +234,9 @@ void approach(){
       analogWrite(rightSpeed, 80);
     }
 
-    if((lVal > thresh) && (cVal > thresh) && (rVal > thresh) && (plVal > thresh) && (pcVal > thresh) && (prVal > thresh)){ //At an intersection. Increment intersection counter
-      //Serial.print("INTERSECTION");
-      intersectionCount++;
-      delay(100);
-    }
-     plVal = lVal;
-     pcVal = cVal;
-     prVal = rVal;
   }
-   analogWrite(leftSpeed, 0);
+  analogWrite(grip,50);
+  analogWrite(leftSpeed, 0);
   analogWrite(rightSpeed, 0);
+ 
 }
