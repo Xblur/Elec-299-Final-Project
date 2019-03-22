@@ -1,3 +1,5 @@
+#include <Servo.h>
+
 int cy = 0;
 int cx = 2;
 int cd = 0;
@@ -27,20 +29,18 @@ int IRVal =0;
 
 //---------------------------------
 
-int pan = 8;
-int tilt = 9;
-int grip = 10;
+int panPIN = 8;
+int tiltPIN = 9;
+int gripPIN = 10;
+
+Servo pan, tilt,grip;
 
 
 void setup() {
   // put your setup code here, to run once:
-  pinMode(tilt, OUTPUT);
-  pinMode(pan, OUTPUT);
-  pinMode(grip, OUTPUT);
-
-
-
-
+  pan.attach(panPIN);
+  tilt.attach(tiltPIN);
+  grip.attach(gripPIN);
   
   // put your setup code here, to run once:
   pinMode(lIRPin, INPUT);
@@ -54,6 +54,10 @@ void setup() {
 
   pinMode(IRpin, INPUT);
 
+  pan.write(90);
+  tilt.write(75);
+  grip.write(140);
+
   Serial.begin(9600);
 
 }
@@ -62,8 +66,6 @@ void loop() {
   // put your main code here, to run repeatedly:
   GoToBall(1,5,3);
   delay(10000);
-  
-
 }
 
 //Function for robot to move to a specified ball's location
@@ -109,7 +111,7 @@ void GoToBall(int x, int y, int d)
         turn(0);
       }
     }
-   // approach();
+    approach();
       
 }
 
@@ -214,8 +216,10 @@ void turn(int dir){
 
 void approach(){
   IRVal = analogRead(IRpin);
-  while(IRVal <680)
+  while(IRVal <638)
   {
+    digitalWrite(leftDirection, HIGH);
+    digitalWrite(rightDirection, HIGH);
     IRVal = analogRead(IRpin);
 
     lVal = analogRead(lIRPin);
@@ -235,7 +239,6 @@ void approach(){
     }
 
   }
-  analogWrite(grip,50);
   analogWrite(leftSpeed, 0);
   analogWrite(rightSpeed, 0);
  
