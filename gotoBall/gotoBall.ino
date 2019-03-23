@@ -71,7 +71,7 @@ void loop() {
 }
 
 //Function for robot to move to a specified ball's location
-void GoToBall(int x, int y, int d)
+void GoToDice(int x, int y, int d)
 {
   if (cy<y){ //if current y coordinate is less than the objective y then move forward until current y is equal to that of the objective
     forward(y-cy);
