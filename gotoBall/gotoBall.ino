@@ -1,5 +1,7 @@
 #include <Servo.h>
 
+int type =0;//initial position. left-0, middle-1, right-2
+
 int cy = 0;
 int cx = 2;
 int cd = 0;
@@ -111,11 +113,36 @@ void GoToBall(int x, int y, int d)
         turn(0);
       }
     }
+    
     approach();
       
 }
-
-
+void GoToBin(int type)//left-0, middle-1 or right-2
+{
+  int y = 0;
+  int x =type+2;//gives location of bin depending on starting position
+  
+  
+  if(cx!=x){ //if the objective is not directly infront of the robot then turn in the direction of the ball and go forward until the ball is in front of the robot
+    if(cx<x){
+      forward(x-cx);
+      cx = x;
+      turn(0);//turn right
+    }
+    else if(cx>x){
+      forward(cx-x);
+      cx = x;
+      turn(1);//turn left
+    }
+  
+  }
+  if (cy!=y){ //if current y coordinate is less than the objective y then move forward until current y is equal to that of the objective
+    forward(cy-y);
+    cy = y;
+  }
+  //drop into bin function
+}
+          
 
 
 
