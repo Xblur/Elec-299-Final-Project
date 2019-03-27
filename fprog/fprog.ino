@@ -3,7 +3,7 @@
 int type =0;//initial position. left-0, middle-1, right-2
 
 int cy = 0;
-int cx = 2;
+int cx = 1;
 int cd = 0;
 
 int leftBumper=1;
@@ -15,6 +15,7 @@ int forceSensor = A4;
 int forceReading = 1027;
 int gripThresh = 300;
 int fIRThresh = 800;
+
 
 int lIRPin = A0;
 int cIRPin = A2;
@@ -80,9 +81,10 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  
-GoToDice(1,5,3);
-delay(10000);
+  //GoToDice(1,5,3);
+  //approach();
+  GoToBin(0);
+delay(1000);
 }
 
 //Function for robot to move to a specified ball's location
@@ -136,14 +138,23 @@ void GoToBin(int type)//left-0, middle-1 or right-2
   int y = 0;
   int x =type+2;//gives location of bin depending on starting position
   
+  Serial.println(cx);
+  Serial.println(cy);
   
+    
+
   if(cx!=x){ //if the objective is not directly infront of the robot then turn in the direction of the ball and go forward until the ball is in front of the robot
     if(cx<x){
+      Serial.println("Going forward");
       forward(x-cx);
+      
       cx = x;
+      Serial.println("turning");
       turn(0);//turn right
     }
     else if(cx>x){
+      Serial.println("Going forward");
+
       forward(cx-x);
       cx = x;
       turn(1);//turn left
@@ -284,8 +295,8 @@ void turnWithDice()
       cVal = analogRead(cIRPin);
       analogWrite(leftSpeed, 100);
       analogWrite(rightSpeed, 100);
-        digitalWrite(leftDirection, HIGH);
-        digitalWrite(rightDirection, LOW);
+      digitalWrite(leftDirection, HIGH);
+      digitalWrite(rightDirection, LOW);
       
     
     }
@@ -346,15 +357,28 @@ void approach(){
     }
 
   }
-  digitalWrite(leftDirection, LOW);
-  digitalWrite(rightDirection, LOW);
+ 
   delay(100);
+  
+ digitalWrite(leftDirection, LOW);
+ digitalWrite(rightDirection, LOW);
+  
+  if((lVal < thresh) && (cVal > thresh) && (rVal < thresh)){ //SET MOTORS TO DRIVE FORWARD
+      analogWrite(leftSpeed, 110);
+      analogWrite(rightSpeed, 100);
+    }else if((lVal > thresh) && (cVal < thresh) && (rVal < thresh)){//LEANING INTO THE RIGHT...SPEED UP RIGHT MOTOR (CALIBRATE)
+      analogWrite(leftSpeed, 160);
+      analogWrite(rightSpeed, 80);
+    }else if((lVal < thresh) && (cVal < thresh) && (rVal > thresh)){//LEANING INTO THE LEFT...SPEED UP RIGHT MOTOR (CALIBRATE)
+      analogWrite(leftSpeed, 100);
+      analogWrite(rightSpeed, 140);
+    }
+  delay(400);
   analogWrite(leftSpeed, 0);
   analogWrite(rightSpeed, 0);
-
  closeGrip();
+ 
 
  turnWithDice();
-
  
 }
