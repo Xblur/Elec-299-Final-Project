@@ -1,10 +1,30 @@
+#define LIGHT_THRESHOLD 700                   //The threshold that determines whether or not a black line is beneath the sensor
+                            //Will require further testing and adjustments
+#define LIGHT_THRESHOLD2 700                  // THE this was what all sensors were beneath when neither were over the line
+                                              //Turns until any sensor exceeds this threshold then proceeds
+
+#define IR_THRESHOLD  300                    //The point at which the robot really needs slow down going to a wall (~5cm form wall)
+#define IR_THRESHOLD2 750                    //When the robot's arm is the farthest it can go towards the wall (0cm from wall)
+
+#define TURN_AJUSTMENT_RATION 0.65           // Ranges from 0.0 - 1.0. The lower the ration the fast the robot turns when it veers to
+                                             // to correct its line tracking (ex 0.6 means that one motor speed is reduced to 60% of normal speed)
+
+
+//*************************************************************
+//*************************************************************
+
+//Function Initalizations for the PICK UP BALL function
+
 #include <Servo.h>
 
 int type =0;//initial position. left-0, middle-1, right-2
 
+if(type==0){
 int cy = 0;
 int cx = 2;
 int cd = 0;
+}
+
 
 int IRpin = A5;
 
@@ -28,6 +48,14 @@ int thresh = 750;
 int lastInter = 0;
 int IRVal =0;
 
+
+//---------------------------------
+
+int left_line = 0;
+int right_line = 0;
+int center_line = 0; 
+int IR_sensor_val = 0;
+int wall_entry_speed = 0;
 
 //---------------------------------
 
@@ -115,6 +143,7 @@ void GoToDice(int x, int y, int d)
     }
     
     approach();
+    GoToBin(type);
       
 }
 void GoToBin(int type)//left-0, middle-1 or right-2
@@ -157,12 +186,6 @@ void forward(int numOfIntersections){
     lVal = analogRead(lIRPin);
     cVal = analogRead(cIRPin);
     rVal = analogRead(rIRPin);
-
-     /*  Serial.print(lVal);
-      Serial.print(" || ");
-      Serial.print(cVal);
-       Serial.print(" || ");
-       Serial.println(rVal); */
     if((lVal < thresh) && (cVal > thresh) && (rVal < thresh)){ //SET MOTORS TO DRIVE FORWARD
       analogWrite(leftSpeed, 110);
       analogWrite(rightSpeed, 100);
@@ -268,5 +291,10 @@ void approach(){
   }
   analogWrite(leftSpeed, 0);
   analogWrite(rightSpeed, 0);
+
+ //pick up
+
+ turn(0);
+ forward(1);
  
 }
