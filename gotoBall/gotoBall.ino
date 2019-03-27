@@ -227,7 +227,7 @@ void turn(int dir){
       cVal = analogRead(cIRPin);
       analogWrite(leftSpeed, 128);
       analogWrite(rightSpeed, 100);
-      if(dir = 1){
+      if(dir == 1){
         digitalWrite(leftDirection, LOW);
         digitalWrite(rightDirection, HIGH);
       }else{
