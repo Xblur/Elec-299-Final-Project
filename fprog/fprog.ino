@@ -1,36 +1,19 @@
-#define LIGHT_THRESHOLD 700                   //The threshold that determines whether or not a black line is beneath the sensor
-                            //Will require further testing and adjustments
-#define LIGHT_THRESHOLD2 700                  // THE this was what all sensors were beneath when neither were over the line
-                                              //Turns until any sensor exceeds this threshold then proceeds
-
-#define IR_THRESHOLD  300                    //The point at which the robot really needs slow down going to a wall (~5cm form wall)
-#define IR_THRESHOLD2 750                    //When the robot's arm is the farthest it can go towards the wall (0cm from wall)
-
-#define TURN_AJUSTMENT_RATION 0.65           // Ranges from 0.0 - 1.0. The lower the ration the fast the robot turns when it veers to
-                                             // to correct its line tracking (ex 0.6 means that one motor speed is reduced to 60% of normal speed)
-
-
-//*************************************************************
-//*************************************************************
-
-//Function Initalizations for the PICK UP BALL function
-
 #include <Servo.h>
 
 int type =0;//initial position. left-0, middle-1, right-2
 
-if(type==0){
 int cy = 0;
 int cx = 2;
 int cd = 0;
-}
-
 
 int IRpin = A5;
 
-int lIRPin = A1;
+int forceSensor = A4;
+int forceThresh = 300;
+
+int lIRPin = A0;
 int cIRPin = A2;
-int rIRPin = A0;
+int rIRPin = A1;
 
 int lVal = 0;
 int cVal = 0;
@@ -44,18 +27,10 @@ int leftSpeed = 5;
 int leftDirection = 4;
 int rightSpeed = 6;
 int rightDirection = 7;
-int thresh = 750;
-int lastInter = 0;
+int thresh = 850;
+unsigned long lastInter = 0;
 int IRVal =0;
 
-
-//---------------------------------
-
-int left_line = 0;
-int right_line = 0;
-int center_line = 0; 
-int IR_sensor_val = 0;
-int wall_entry_speed = 0;
 
 //---------------------------------
 
@@ -83,6 +58,7 @@ void setup() {
   pinMode(rightDirection, OUTPUT);
 
   pinMode(IRpin, INPUT);
+  pinMode(forceSensor, INPUT);
 
   pan.write(90);
   tilt.write(75);
@@ -94,8 +70,14 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  GoToBall(1,5,3);
-  delay(10000);
+  /*
+ forward(2);
+ turn(1);
+ turn(1);*/
+ Serial.println(analogRead(forceSensor));
+
+
+
 }
 
 //Function for robot to move to a specified ball's location
@@ -143,7 +125,6 @@ void GoToDice(int x, int y, int d)
     }
     
     approach();
-    GoToBin(type);
       
 }
 void GoToBin(int type)//left-0, middle-1 or right-2
@@ -186,15 +167,21 @@ void forward(int numOfIntersections){
     lVal = analogRead(lIRPin);
     cVal = analogRead(cIRPin);
     rVal = analogRead(rIRPin);
+
+     /*  Serial.print(lVal);
+      Serial.print(" || ");
+      Serial.print(cVal);
+       Serial.print(" || ");
+       Serial.println(rVal); */
     if((lVal < thresh) && (cVal > thresh) && (rVal < thresh)){ //SET MOTORS TO DRIVE FORWARD
-      analogWrite(leftSpeed, 110);
-      analogWrite(rightSpeed, 100);
+      analogWrite(leftSpeed, 148);
+      analogWrite(rightSpeed, 128);
     }else if((lVal > thresh) && (cVal < thresh) && (rVal < thresh)){//LEANING INTO THE RIGHT...SPEED UP RIGHT MOTOR (CALIBRATE)
-      analogWrite(leftSpeed, 100);
-      analogWrite(rightSpeed, 140);
+      analogWrite(leftSpeed, 108);
+      analogWrite(rightSpeed, 128);
     }else if((lVal < thresh) && (cVal < thresh) && (rVal > thresh)){//LEANING INTO THE LEFT...SPEED UP RIGHT MOTOR (CALIBRATE)
-      analogWrite(leftSpeed, 160);
-      analogWrite(rightSpeed, 80);
+      analogWrite(leftSpeed, 208);
+      analogWrite(rightSpeed, 128);
     }
 
     if((lVal > thresh) && (cVal > thresh) && (rVal > thresh) && (plVal > thresh) && (pcVal > thresh) && (prVal > thresh)){ //At an intersection. Increment intersection counter
@@ -213,24 +200,25 @@ void forward(int numOfIntersections){
   }
   analogWrite(leftSpeed, 0);
   analogWrite(rightSpeed, 0);
+  delay(200);
 }
 
 //Function to turn in a specified direction until a black line is hit
 void turn(int dir){ 
   //drive a little past the intersection 
-  delay(50);
-  analogWrite(leftSpeed, 128);
-  analogWrite(rightSpeed, 100);
+  //delay(50);
+  analogWrite(leftSpeed, 148);
+  analogWrite(rightSpeed, 128);
   digitalWrite(leftDirection, HIGH);
   digitalWrite(rightDirection, HIGH);
-  delay(700);
+  delay(400);
   
   if(dir == 1){//Begin turning counter-clockwise to ensure that center line sensor is not scaning the black tape
      analogWrite(leftSpeed, 128);
      analogWrite(rightSpeed, 100);
      digitalWrite(leftDirection, LOW);
      digitalWrite(rightDirection, HIGH);
-     delay(200);
+     delay(550);
      if(cd ==0){ //Update direction robot is facing
       cd =3;
      }else{
@@ -242,13 +230,13 @@ void turn(int dir){
      analogWrite(rightSpeed, 100);
      digitalWrite(leftDirection, HIGH);
      digitalWrite(rightDirection, LOW);
-     delay(200);
+     delay(300);
      cd = (cd+1)%4; //Update direction robot is facing
   }
    cVal = analogRead(cIRPin);
    while(cVal<thresh){ //Continue rotating in specified direction until the center line sensor reads the black tape value
       cVal = analogRead(cIRPin);
-      analogWrite(leftSpeed, 128);
+      analogWrite(leftSpeed, 100);
       analogWrite(rightSpeed, 100);
       if(dir == 1){
         digitalWrite(leftDirection, LOW);
@@ -262,7 +250,6 @@ void turn(int dir){
     analogWrite(leftSpeed, 0);
     analogWrite(rightSpeed, 0);
 }
-
 
 void approach(){
   IRVal = analogRead(IRpin);
