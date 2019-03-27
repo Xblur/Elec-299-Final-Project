@@ -3,7 +3,7 @@
 int type =0;//initial position. left-0, middle-1, right-2
 
 int cy = 0;
-int cx = 1;
+int cx = 2;
 int cd = 0;
 
 int leftBumper=1;
@@ -81,10 +81,11 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  //GoToDice(1,5,3);
-  //approach();
+  Serial.println("BEGINING LOOP()");
+  GoToDice(1,5,3);
+  approach();
   GoToBin(0);
-delay(1000);
+  delay(10000);
 }
 
 //Function for robot to move to a specified ball's location
@@ -147,10 +148,11 @@ void GoToBin(int type)//left-0, middle-1 or right-2
     if(cx<x){
       Serial.println("Going forward");
       forward(x-cx);
-      
       cx = x;
-      Serial.println("turning");
       turn(0);//turn right
+      
+      Serial.println("turning");
+     
     }
     else if(cx>x){
       Serial.println("Going forward");
@@ -304,7 +306,7 @@ void turnWithDice()
     analogWrite(leftSpeed, 0);
     analogWrite(rightSpeed, 0);
     delay(100);
-    forward(1);
+    //forward(1);
  }
 
 void closeGrip(){
@@ -329,6 +331,19 @@ void closeGrip(){
 
 
 void approach(){
+  if(cd == 3)
+  {
+    cx--;
+  }
+  if(cd == 0)
+  {
+    cy++;
+  }
+  if(cd == 1)
+  {
+    cx++;
+  }
+  
   IRVal = analogRead(IRpin);
   leftBumper = digitalRead(lBump);
   rightBumper = digitalRead(rBump);
@@ -380,5 +395,17 @@ void approach(){
  
 
  turnWithDice();
+ 
+  if((lVal < thresh) && (cVal > thresh) && (rVal < thresh)){ //SET MOTORS TO DRIVE FORWARD
+      analogWrite(leftSpeed, 110);
+      analogWrite(rightSpeed, 100);
+    }else if((lVal > thresh) && (cVal < thresh) && (rVal < thresh)){//LEANING INTO THE RIGHT...SPEED UP RIGHT MOTOR (CALIBRATE)
+      analogWrite(leftSpeed, 160);
+      analogWrite(rightSpeed, 80);
+    }else if((lVal < thresh) && (cVal < thresh) && (rVal > thresh)){//LEANING INTO THE LEFT...SPEED UP RIGHT MOTOR (CALIBRATE)
+      analogWrite(leftSpeed, 100);
+      analogWrite(rightSpeed, 140);
+    }
+  delay(500);
  
 }
