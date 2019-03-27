@@ -1,0 +1,196 @@
+
+//THIS IS NOT DONE NEEDS MORE WORK
+
+int L_bumperPin = 2;
+int R_bumperPin = 3;
+int x = 0; //index of next x
+int y = 1; //index of next y
+int d = 2; //index of next z
+//increment these at every drop ball
+
+void setup() {
+  // put your setup code here, to run once:
+
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  double IR_val = analogRead(IR_sensor);
+  boolean L_bumper = digitalRead(L_bumperPin);
+  boolean R_bumper = digitalRead(R_bumperPin);
+}
+
+
+//Collision Code
+// want this to return a boolean so that it can be added to a while statement for movement function
+
+void CollisionWatch(){
+//if robots turn into each other.
+  //if robot turns into something
+  double IR_val = analogRead(IR_sensor);
+  boolean L_bumper = digitalRead(L_bumperPin);
+  boolean R_bumper = digitalRead(R_bumperPin);
+    //NEED TO FIX THIS CASE BUT BRAIN HURTS
+    if (L_bumper == HIGH ^ R_bumper == HIGH){    //need xor not sure if this will work need to test needs to be bit but not sure if HIGH/LOW is 1/0
+        //NOTE direction is changed before turn is completed so its okay to assume values when in full turn
+              if (botsLoc[3] = 2){
+                //returning to bin  
+                delay(xxx); //make other move... should not happen in a spot where that is not possible with the way route is planned.
+                continueTo();
+              }
+              else if(botsLoc[3] = 0){
+                reverse(xxx,xxx);
+                      if(L_bumper == HIGH){
+                        turn(1);
+                        //adjust distance count manually because will most likely make a 180 turn not 90 because of being inbetween intersections
+                        //this portion needs to be adjusted but need testing first
+                        correctionLoop();
+                        
+                      }
+                      else if(R_bumper == HIGH){
+                        turn(0);
+                        correctionLoop();
+                      }
+                turn(1);
+                //reverse to previous intersection if possible else skip and let other bot 
+                //pull to right if possible else left
+                
+               pause_robot(xxx, xxx);
+                //turn 180 
+                //make corrective turn (same turn as before
+                //continue to go to Loc
+              }
+              else if (botsLoc[3] = 3){
+                //back up to intersection
+                pause_robot(xxx);
+                continueTo();
+                
+              }
+              else{ //(botsLoc[3] = 1)
+                pause_robot(xxx);
+                continueTo();
+              }
+      }
+  // if robot hits wall in theory, going to use front IR to avoid obstacles should never reach wall thershold unless in specic
+    if (L_bumper == HIGH && R_bumper == HIGH){
+      
+      if ( botsLoc[0] > 5 || botsLoc[0] < 1 || botsLoc[1] > 5 || botsLoc[1] < 0){
+          //the robot is approaching a wall
+          pickUpBall();
+        }
+        else {
+          // the robot has run into back/side of obstacle
+          reverse(xxx);
+          pause_robot(xxx);
+          continueTo();
+        }
+    }
+    
+    // this is value where we are getting close to something
+    if ( IR_val == IR_THRESHOLD){ 
+
+        if ( botsLoc[0] > 5 || botsLoc[0] < 1 || botsLoc[1] > 5 || botsLoc[1] < 0){
+          
+          pick_up_ball();
+          
+        }
+        else {
+          // the robot is approaching an obstacle
+         pause_robot();
+         double new_ir = analogRead(IR_sensor);
+            if (IR_val < new_ir) {
+              //robot moved
+              continueTo();
+            }
+            else {
+              // robot is facing another robot who is locked too
+              // give prominance to direction. 
+          
+              if (botsLoc[3] = 2){
+                //returning to bin  
+                delay(500);
+                gotoBin();
+              }
+              else if(botsLoc[3] = 0){
+                //reverse to previous intersection if possible else skip and let other bot 
+                //pull to right if possible else left
+                stop_robot();
+                pass();
+                //turn 180 
+                //make corrective turn (same turn as before
+                //continue to go to Loc
+              }
+              else if (botsLoc[3] = 3){
+                //back up to intersection
+                pause_robot(xxx);//diff pause time vv
+                continueTo();
+                
+              }
+              else{
+                pause_robot(xxx);//than this one
+                continueTo();
+              }
+                
+              }
+            
+              
+            }
+        }
+      
+    }
+
+    void continueTo(){
+      //if holding something
+      if (gripSensor >= threshold){
+            gotoBin(botsHome[0], botsHome[1], botsHome[2]);
+      }
+      else {
+        gotoBall(botsPickUpLOC[x], botsPickUpLOC[y], botsPickUpLOC[d]);
+      } 
+    }
+    
+    void stop_robot(){
+         digitalWrite(M1, HIGH);
+         digitalWrite(M2, HIGH);
+         analogWrite(E1, 0);
+         analogWrite(E2, 0);
+      }
+
+    void pause_robot(int wait){
+         digitalWrite(M1, HIGH);
+         digitalWrite(M2, HIGH);
+         analogWrite(E1, 0);
+         analogWrite(E2, 0);
+         delay(wait);
+         forward();// need to return to previous action not really forward maybe gotoBall();
+      }
+
+    void forward_straight(int spd){
+         digitalWrite(M1, HIGH);
+         digitalWrite(M2, HIGH);
+         analogWrite(E1, spd);
+         analogWrite(E2, spd);
+      }
+      
+      void reverse_pause(int spd, int delaytime){
+        digitalWrite(M1, LOW);
+        digitalWrite(M2, LOW);
+        analogWrite(E1, spd);
+        analogWrite(E2, spd);
+        delay(delaytime);
+      }
+
+      void correctionLoop(){
+        //already turned around
+        forward();
+        if (x <= botsLoc[0]){
+          turn(2); //turn right
+          
+        }
+        else{
+          turn(1);
+        }
+        //forward to next intersection turn again
+        //can i call continueTo() 
+      }
+
