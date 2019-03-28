@@ -6,10 +6,16 @@ int cy = 0;
 int cx = 2;
 int cd = 0;
 
+int leftBumper=1;
+int rightBumper=1;
+
 int IRpin = A5;
 
 int forceSensor = A4;
-int forceThresh = 300;
+int forceReading = 1027;
+int gripThresh = 300;
+int fIRThresh = 800;
+
 
 int lIRPin = A0;
 int cIRPin = A2;
@@ -39,7 +45,9 @@ int tiltPIN = 9;
 int gripPIN = 10;
 
 Servo pan, tilt,grip;
-
+//--------------------------------
+int lBump = 0;
+int rBump = 11;
 
 void setup() {
   // put your setup code here, to run once:
@@ -57,11 +65,14 @@ void setup() {
   pinMode(rightSpeed, OUTPUT);
   pinMode(rightDirection, OUTPUT);
 
+  pinMode(lBump, INPUT);
+  pinMode(rBump, INPUT);
+
   pinMode(IRpin, INPUT);
   pinMode(forceSensor, INPUT);
 
   pan.write(90);
-  tilt.write(75);
+  tilt.write(200);
   grip.write(140);
 
   Serial.begin(9600);
@@ -70,14 +81,11 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  /*
- forward(2);
- turn(1);
- turn(1);*/
- Serial.println(analogRead(forceSensor));
-
-
-
+  Serial.println("BEGINING LOOP()");
+  GoToDice(1,5,3);
+  approach();
+  GoToBin(0);
+  delay(10000);
 }
 
 //Function for robot to move to a specified ball's location
@@ -86,7 +94,6 @@ void GoToDice(int x, int y, int d)
   if (cy<y){ //if current y coordinate is less than the objective y then move forward until current y is equal to that of the objective
     forward(y-cy);
     cy = y;
-    Serial.println("Done with Y");
  
   }
   if(cx!=x){ //if the objective is not directly infront of the robot then turn in the direction of the ball and go forward until the ball is in front of the robot
@@ -96,7 +103,6 @@ void GoToDice(int x, int y, int d)
       cx = x;
     }
     else if(cx>x){
-      Serial.println("I will turn Left");
       turn(1);
       forward(cx-x);
       cx = x;
@@ -127,19 +133,30 @@ void GoToDice(int x, int y, int d)
     approach();
       
 }
+
 void GoToBin(int type)//left-0, middle-1 or right-2
 {
   int y = 0;
   int x =type+2;//gives location of bin depending on starting position
   
+  Serial.println(cx);
+  Serial.println(cy);
   
+    
+
   if(cx!=x){ //if the objective is not directly infront of the robot then turn in the direction of the ball and go forward until the ball is in front of the robot
     if(cx<x){
+      Serial.println("Going forward");
       forward(x-cx);
       cx = x;
       turn(0);//turn right
+      
+      Serial.println("turning");
+     
     }
     else if(cx>x){
+      Serial.println("Going forward");
+
       forward(cx-x);
       cx = x;
       turn(1);//turn left
@@ -251,11 +268,89 @@ void turn(int dir){
     analogWrite(rightSpeed, 0);
 }
 
+void turnWithDice()
+{
+     if(cd ==0){ //Update direction robot is facing
+      cd =2;
+     }
+     else if(cd==1){
+        cd = 3;
+      }
+     else if(cd ==2)
+     {
+      cd = 0;
+     }
+     else //cd == 3
+     {
+      cd = 1;
+     }
+     
+     
+     analogWrite(leftSpeed, 128);
+     analogWrite(rightSpeed, 100);
+     digitalWrite(leftDirection, HIGH);
+     digitalWrite(rightDirection, LOW);
+     delay(550);
+     
+     cVal = analogRead(cIRPin);
+     while(cVal<thresh){ //Continue rotating in specified direction until the center line sensor reads the black tape value
+      cVal = analogRead(cIRPin);
+      analogWrite(leftSpeed, 100);
+      analogWrite(rightSpeed, 100);
+      digitalWrite(leftDirection, HIGH);
+      digitalWrite(rightDirection, LOW);
+      
+    
+    }
+    
+    analogWrite(leftSpeed, 0);
+    analogWrite(rightSpeed, 0);
+    delay(100);
+    //forward(1);
+ }
+
+void closeGrip(){
+  int i = 90;
+  int x = 200;
+  while(x>70){
+    tilt.write(x);
+    x--;
+    delay(20);
+  }
+  
+  forceReading = analogRead(forceSensor);
+  while(forceReading > gripThresh){
+    forceReading = analogRead(forceSensor);
+    Serial.println(forceReading);
+    i++;
+    grip.write(i);
+    delay(50);
+  }
+  Serial.println("OBJECT GRABBED");
+}
+
 
 void approach(){
-  IRVal = analogRead(IRpin);
-  while(IRVal <638)
+  if(cd == 3)
   {
+    cx--;
+  }
+  if(cd == 0)
+  {
+    cy++;
+  }
+  if(cd == 1)
+  {
+    cx++;
+  }
+  
+  IRVal = analogRead(IRpin);
+  leftBumper = digitalRead(lBump);
+  rightBumper = digitalRead(rBump);
+  while(leftBumper && rightBumper)
+  {
+    leftBumper = digitalRead(lBump);
+    rightBumper = digitalRead(rBump);
     digitalWrite(leftDirection, HIGH);
     digitalWrite(rightDirection, HIGH);
     IRVal = analogRead(IRpin);
@@ -277,7 +372,40 @@ void approach(){
     }
 
   }
+ 
+  delay(100);
+  
+ digitalWrite(leftDirection, LOW);
+ digitalWrite(rightDirection, LOW);
+  
+  if((lVal < thresh) && (cVal > thresh) && (rVal < thresh)){ //SET MOTORS TO DRIVE FORWARD
+      analogWrite(leftSpeed, 110);
+      analogWrite(rightSpeed, 100);
+    }else if((lVal > thresh) && (cVal < thresh) && (rVal < thresh)){//LEANING INTO THE RIGHT...SPEED UP RIGHT MOTOR (CALIBRATE)
+      analogWrite(leftSpeed, 160);
+      analogWrite(rightSpeed, 80);
+    }else if((lVal < thresh) && (cVal < thresh) && (rVal > thresh)){//LEANING INTO THE LEFT...SPEED UP RIGHT MOTOR (CALIBRATE)
+      analogWrite(leftSpeed, 100);
+      analogWrite(rightSpeed, 140);
+    }
+  delay(400);
   analogWrite(leftSpeed, 0);
   analogWrite(rightSpeed, 0);
+ closeGrip();
+ 
+
+ turnWithDice();
+ 
+  if((lVal < thresh) && (cVal > thresh) && (rVal < thresh)){ //SET MOTORS TO DRIVE FORWARD
+      analogWrite(leftSpeed, 110);
+      analogWrite(rightSpeed, 100);
+    }else if((lVal > thresh) && (cVal < thresh) && (rVal < thresh)){//LEANING INTO THE RIGHT...SPEED UP RIGHT MOTOR (CALIBRATE)
+      analogWrite(leftSpeed, 160);
+      analogWrite(rightSpeed, 80);
+    }else if((lVal < thresh) && (cVal < thresh) && (rVal > thresh)){//LEANING INTO THE LEFT...SPEED UP RIGHT MOTOR (CALIBRATE)
+      analogWrite(leftSpeed, 100);
+      analogWrite(rightSpeed, 140);
+    }
+  delay(500);
  
 }
