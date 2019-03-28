@@ -92,20 +92,25 @@ void loop() {
 void GoToDice(int x, int y, int d)
 {
   if (cy<y){ //if current y coordinate is less than the objective y then move forward until current y is equal to that of the objective
+    Serial.println("Starting to in the Y direction. CY = " + (String)cy);
     forward(y-cy);
     cy = y;
- 
+    Serial.println("finished moving along y. CY = " + (String)cy);
   }
   if(cx!=x){ //if the objective is not directly infront of the robot then turn in the direction of the ball and go forward until the ball is in front of the robot
     if(cx<x){
+      Serial.println("Starting to in the x direction. CX = " + (String)cx);
       turn(0);
       forward(x-cx);
       cx = x;
+      Serial.println("finished moving along y. CX = " + (String)cx);
     }
     else if(cx>x){
+      Serial.println("Starting to in the x direction. CX = " + (String)cx);
       turn(1);
       forward(cx-x);
       cx = x;
+      Serial.println("finished moving along y. CX = " + (String)cx);
     }
   
   }
@@ -129,7 +134,7 @@ void GoToDice(int x, int y, int d)
         turn(0);
       }
     }
-    
+    Serial.println("Calling approch function");
     approach();
       
 }
@@ -139,33 +144,37 @@ void GoToBin(int type)//left-0, middle-1 or right-2
   int y = 0;
   int x =type+2;//gives location of bin depending on starting position
   
-  Serial.println(cx);
-  Serial.println(cy);
+  Serial.println("Intial CX value at goToBin. CX = " + (String)cx);
+  Serial.println("Intial CY value at goToBin. CY = " + (String)cy);
   
     
 
   if(cx!=x){ //if the objective is not directly infront of the robot then turn in the direction of the ball and go forward until the ball is in front of the robot
     if(cx<x){
-      Serial.println("Going forward");
+      Serial.println("Moving along x axis.");
       forward(x-cx);
       cx = x;
       turn(0);//turn right
       
-      Serial.println("turning");
+      Serial.println("Final CX value in goToBin function. CX = " + (String)cx);
      
     }
     else if(cx>x){
-      Serial.println("Going forward");
+      Serial.println("Moving along x axis.");
 
       forward(cx-x);
       cx = x;
       turn(1);//turn left
+
+      Serial.println("Final CX value in goToBin function. CX = " + (String)cx);
     }
   
   }
   if (cy!=y){ //if current y coordinate is less than the objective y then move forward until current y is equal to that of the objective
+    Serial.println("Moving along y axis.");
     forward(cy-y);
     cy = y;
+    Serial.println("Final CY value in goToBin function. CY = " + (String)cy);
   }
   //drop into bin function
 }
@@ -299,8 +308,6 @@ void turnWithDice()
       analogWrite(rightSpeed, 100);
       digitalWrite(leftDirection, HIGH);
       digitalWrite(rightDirection, LOW);
-      
-    
     }
     
     analogWrite(leftSpeed, 0);
@@ -321,7 +328,7 @@ void closeGrip(){
   forceReading = analogRead(forceSensor);
   while(forceReading > gripThresh){
     forceReading = analogRead(forceSensor);
-    Serial.println(forceReading);
+    //Serial.println(forceReading);
     i++;
     grip.write(i);
     delay(50);
@@ -331,6 +338,7 @@ void closeGrip(){
 
 
 void approach(){
+  Serial.println("Starting approach function.");
   if(cd == 3)
   {
     cx--;
@@ -343,6 +351,9 @@ void approach(){
   {
     cx++;
   }
+
+  Serial.println("CX = " + (String)cx);
+  Serial.println("CY = " + (String)cy);
   
   IRVal = analogRead(IRpin);
   leftBumper = digitalRead(lBump);
@@ -378,15 +389,15 @@ void approach(){
  digitalWrite(leftDirection, LOW);
  digitalWrite(rightDirection, LOW);
   
-  if((lVal < thresh) && (cVal > thresh) && (rVal < thresh)){ //SET MOTORS TO DRIVE FORWARD
-      analogWrite(leftSpeed, 110);
-      analogWrite(rightSpeed, 100);
+    if((lVal < thresh) && (cVal > thresh) && (rVal < thresh)){ //SET MOTORS TO DRIVE FORWARD
+      analogWrite(leftSpeed, 148);
+      analogWrite(rightSpeed, 128);
     }else if((lVal > thresh) && (cVal < thresh) && (rVal < thresh)){//LEANING INTO THE RIGHT...SPEED UP RIGHT MOTOR (CALIBRATE)
-      analogWrite(leftSpeed, 160);
-      analogWrite(rightSpeed, 80);
+      analogWrite(leftSpeed, 108);
+      analogWrite(rightSpeed, 128);
     }else if((lVal < thresh) && (cVal < thresh) && (rVal > thresh)){//LEANING INTO THE LEFT...SPEED UP RIGHT MOTOR (CALIBRATE)
-      analogWrite(leftSpeed, 100);
-      analogWrite(rightSpeed, 140);
+      analogWrite(leftSpeed, 208);
+      analogWrite(rightSpeed, 128);
     }
   delay(400);
   analogWrite(leftSpeed, 0);
@@ -396,16 +407,8 @@ void approach(){
 
  turnWithDice();
  
-  if((lVal < thresh) && (cVal > thresh) && (rVal < thresh)){ //SET MOTORS TO DRIVE FORWARD
-      analogWrite(leftSpeed, 110);
-      analogWrite(rightSpeed, 100);
-    }else if((lVal > thresh) && (cVal < thresh) && (rVal < thresh)){//LEANING INTO THE RIGHT...SPEED UP RIGHT MOTOR (CALIBRATE)
-      analogWrite(leftSpeed, 160);
-      analogWrite(rightSpeed, 80);
-    }else if((lVal < thresh) && (cVal < thresh) && (rVal > thresh)){//LEANING INTO THE LEFT...SPEED UP RIGHT MOTOR (CALIBRATE)
-      analogWrite(leftSpeed, 100);
-      analogWrite(rightSpeed, 140);
-    }
+
   delay(500);
+  Serial.println("Done with Approach.");
  
 }
