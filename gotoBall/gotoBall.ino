@@ -279,5 +279,10 @@ void approach(){
   }
   analogWrite(leftSpeed, 0);
   analogWrite(rightSpeed, 0);
+
+  //pickup
+
+  turn(1);
+  forward(1);
  
 }
