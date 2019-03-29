@@ -725,4 +725,22 @@ void approachBin() {
   delay(50);
   tilt.write(200);
   delay(50);
+
+  digitalWrite(leftDirection, HIGH);
+  digitalWrite(rightDirection, HIGH);
+  if ((lVal < thresh) && (cVal > thresh) && (rVal < thresh)) { //SET MOTORS TO DRIVE FORWARD
+    analogWrite(leftSpeed, lSP);
+    analogWrite(rightSpeed, rSP);
+  } else if ((lVal > thresh) && (cVal < thresh) && (rVal < thresh)) { //LEANING INTO THE RIGHT...SPEED UP RIGHT MOTOR (CALIBRATE)
+    analogWrite(leftSpeed, lSP - 40);
+    analogWrite(rightSpeed, rSP + 20);
+  } else if ((lVal < thresh) && (cVal < thresh) && (rVal > thresh)) { //LEANING INTO THE LEFT...SPEED UP RIGHT MOTOR (CALIBRATE)
+    analogWrite(leftSpeed, lSP + 20);
+    analogWrite(rightSpeed, rSP - 40);
+  }
+
+  delay(200);
+  analogWrite(leftSpeed, 0);
+  analogWrite(rightSpeed, 0);
+
 }
