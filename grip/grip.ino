@@ -44,21 +44,23 @@ void setup(){
 void loop(){
   delay(2500);
   closeGrip();
-  
+  delay(100);
+  exit(0);
 }
 
 void closeGrip(){
-  int i = 90;
+  int i = 75;
   
   forceReading = analogRead(forceSensor);
   while(forceReading > GRIPTHRESHOLD){
     forceReading = analogRead(forceSensor);
     Serial.println(forceReading);
     i++;
-    grip.write(i);
-    delay(50);
+    int j = i%200;
+    Serial.println(j);
+    grip.write(j);
+    delay(10);
   }
+  
   Serial.println("OBJECT GRABBED");
 }
-
-
