@@ -8,16 +8,16 @@ int cd = 0;
 int x = 0;
 int y = 0;
 int d = 0;
-int xIn = 5;
-int yIn = 1;
-int dIn = 1;
-int delayTLeft = 400; //500 when half bat 400 when full bat
-int delayTRight = 400; //500 when half bat 400 when full bat
-int delayBeforeT = 250; // 350 when half 250 when full
+int xIn;
+int yIn;
+int dIn;
+int delayTLeft = 550; //500 when half bat 400 when full bat
+int delayTRight = 550; //500 when half bat 400 when full bat
+int delayBeforeT = 200; // 350 when half 250 when full
 int lSP = 200;
 int rSP = 190;
 int turnMod = 90; // 80 when half 90 when full
-int resetTMod = 0; // 10 when full 0 when half;
+int resetTMod = 10; // subtracts from turn speed after drop dice. 10 when full -10 when half;
 int turnADPD = 150; // 150 when full 200 when half
 
 int leftBumper = 1;
@@ -96,45 +96,6 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   Serial.println("BEGINING LOOP()");
-  GoToDice(xIn, yIn, dIn);
-  approachDice();
-  GoToBin(type);
-  approachBin();
-  xIn = 5;
-  yIn = 2;
-  dIn = 1;
-  GoToDice(xIn, yIn, dIn);
-  approachDice();
-  GoToBin(type);
-  approachBin();
-  xIn = 5;
-  yIn = 3;
-  dIn = 1;
-  GoToDice(xIn, yIn, dIn);
-  approachDice();
-  GoToBin(type);
-  approachBin();
-  xIn = 5;
-  yIn = 4;
-  dIn = 1;
-  GoToDice(xIn, yIn, dIn);
-  approachDice();
-  GoToBin(type);
-  approachBin();
-  xIn = 5;
-  yIn = 5;
-  dIn = 1;
-  GoToDice(xIn, yIn, dIn);
-  approachDice();
-  GoToBin(type);
-  approachBin();
-  xIn = 5;
-  yIn = 5;
-  dIn = 0;
-  GoToDice(xIn, yIn, dIn);
-  approachDice();
-  GoToBin(type);
-  approachBin();
   xIn = 4;
   yIn = 5;
   dIn = 0;
@@ -142,62 +103,104 @@ void loop() {
   approachDice();
   GoToBin(type);
   approachBin();
-  xIn = 3;
-  yIn = 5;
-  dIn = 0;
-  GoToDice(xIn, yIn, dIn);
-  approachDice();
-  GoToBin(type);
-  approachBin();
-  xIn = 2;
-  yIn = 5;
-  dIn = 0;
-  GoToDice(xIn, yIn, dIn);
-  approachDice();
-  GoToBin(type);
-  approachBin();
-  xIn = 1;
-  yIn = 5;
-  dIn = 0;
-  GoToDice(xIn, yIn, dIn);
-  approachDice();
-  GoToBin(type);
-  approachBin();
-  xIn = 1;
-  yIn = 5;
-  dIn = 3;
-  GoToDice(xIn, yIn, dIn);
-  approachDice();
-  GoToBin(type);
-  approachBin();
-  xIn = 1;
-  yIn = 4;
-  dIn = 3;
-  GoToDice(xIn, yIn, dIn);
-  approachDice();
-  GoToBin(type);
-  approachBin();
-  xIn = 1;
-  yIn = 3;
-  dIn = 3;
-  GoToDice(xIn, yIn, dIn);
-  approachDice();
-  GoToBin(type);
-  approachBin();
-  xIn = 1;
-  yIn = 2;
-  dIn = 3;
-  GoToDice(xIn, yIn, dIn);
-  approachDice();
-  GoToBin(type);
-  approachBin();
-  xIn = 1;
-  yIn = 1;
-  dIn = 3;
-  GoToDice(xIn, yIn, dIn);
-  approachDice();
-  GoToBin(type);
-  approachBin();
+  //  xIn = 5;
+  //  yIn = 5;
+  //  dIn = 1;
+  //  GoToDice(xIn, yIn, dIn);
+  //  approachDice();
+  //  GoToBin(type);
+  //  approachBin();
+  //  xIn = 1;
+  //  yIn = 5;
+  //  dIn = 3;
+  //  GoToDice(xIn, yIn, dIn);
+  //  approachDice();
+  //  GoToBin(type);
+  //  approachBin();
+  //  xIn = 1;
+  //  yIn = 1;
+  //  dIn = 3;
+  //  GoToDice(xIn, yIn, dIn);
+  //  approachDice();
+  //  GoToBin(type);
+  //  approachBin();
+  //  xIn = 5;
+  //  yIn = 1;
+  //  dIn = 1;
+  //  GoToDice(xIn, yIn, dIn);
+  //  approachDice();
+  //  GoToBin(type);
+  //  approachBin();
+  //  xIn = 5;
+  //  yIn = 5;
+  //  dIn = 0;
+  //  GoToDice(xIn, yIn, dIn);
+  //  approachDice();
+  //  GoToBin(type);
+  //  approachBin();
+  //  xIn = 4;
+  //  yIn = 5;
+  //  dIn = 0;
+  //  GoToDice(xIn, yIn, dIn);
+  //  approachDice();
+  //  GoToBin(type);
+  //  approachBin();
+  //  xIn = 3;
+  //  yIn = 5;
+  //  dIn = 0;
+  //  GoToDice(xIn, yIn, dIn);
+  //  approachDice();
+  //  GoToBin(type);
+  //  approachBin();
+  //  xIn = 2;
+  //  yIn = 5;
+  //  dIn = 0;
+  //  GoToDice(xIn, yIn, dIn);
+  //  approachDice();
+  //  GoToBin(type);
+  //  approachBin();
+  //  xIn = 1;
+  //  yIn = 5;
+  //  dIn = 0;
+  //  GoToDice(xIn, yIn, dIn);
+  //  approachDice();
+  //  GoToBin(type);
+  //  approachBin();
+  //  xIn = 1;
+  //  yIn = 5;
+  //  dIn = 3;
+  //  GoToDice(xIn, yIn, dIn);
+  //  approachDice();
+  //  GoToBin(type);
+  //  approachBin();
+  //  xIn = 1;
+  //  yIn = 4;
+  //  dIn = 3;
+  //  GoToDice(xIn, yIn, dIn);
+  //  approachDice();
+  //  GoToBin(type);
+  //  approachBin();
+  //  xIn = 1;
+  //  yIn = 3;
+  //  dIn = 3;
+  //  GoToDice(xIn, yIn, dIn);
+  //  approachDice();
+  //  GoToBin(type);
+  //  approachBin();
+  //  xIn = 1;
+  //  yIn = 2;
+  //  dIn = 3;
+  //  GoToDice(xIn, yIn, dIn);
+  //  approachDice();
+  //  GoToBin(type);
+  //  approachBin();
+  //  xIn = 1;
+  //  yIn = 1;
+  //  dIn = 3;
+  //  GoToDice(xIn, yIn, dIn);
+  //  approachDice();
+  //  GoToBin(type);
+  //  approachBin();
   exit(0);
 }
 
@@ -388,6 +391,10 @@ void forward(int numOfIntersections) {
       analogWrite(leftSpeed, lSP + 20);
       analogWrite(rightSpeed, rSP - 40);
     }
+    else {
+      analogWrite(leftSpeed, lSP - 80);
+      analogWrite(rightSpeed, rSP - 80);
+    }
 
     if ((lVal > thresh) && (cVal > thresh) && (rVal > thresh) && (plVal > thresh) && (pcVal > thresh) && (prVal > thresh)) { //At an intersection. Increment intersection counter
       if ((millis() - lastInter) > 170) {
@@ -505,6 +512,22 @@ void turn(int dir) {
 
 void turnWithDice()
 {
+  digitalWrite(leftDirection, HIGH);
+  digitalWrite(rightDirection, HIGH);
+  unsigned long timer = millis();
+  while ((millis() - timer) < 150) {
+    if ((lVal < thresh) && (cVal > thresh) && (rVal < thresh)) { //SET MOTORS TO DRIVE FORWARD
+      analogWrite(leftSpeed, lSP);
+      analogWrite(rightSpeed, rSP);
+    } else if (((lVal > thresh) && (cVal < thresh) && (rVal < thresh)) || ((lVal > thresh) && (cVal > thresh) && (rVal < thresh))) { //LEANING INTO THE RIGHT...SPEED UP RIGHT MOTOR (CALIBRATE)
+      analogWrite(leftSpeed, lSP - 40);
+      analogWrite(rightSpeed, rSP + 20);
+    } else if ((lVal < thresh) && (cVal < thresh) && (rVal > thresh) || ((lVal < thresh) && (cVal > thresh) && (rVal > thresh))) { //LEANING INTO THE LEFT...SPEED UP RIGHT MOTOR (CALIBRATE)
+      analogWrite(leftSpeed, lSP + 20);
+      analogWrite(rightSpeed, rSP - 40);
+    }
+
+  }
   analogWrite(leftSpeed, lSP - turnMod);
   analogWrite(rightSpeed, rSP - turnMod);
   digitalWrite(leftDirection, HIGH);
@@ -701,24 +724,49 @@ void approachBin() {
   analogWrite(rightSpeed, rSP - 40);
   delay(300);
   Serial.println("went back");
-  analogWrite(leftSpeed, lSP - turnMod - resetTMod);
-  analogWrite(rightSpeed, rSP - turnMod - resetTMod);
+  turn(1);
+  //  analogWrite(leftSpeed, lSP - turnMod - resetTMod);
+  //  analogWrite(rightSpeed, rSP - turnMod - resetTMod);
+  //  digitalWrite(leftDirection, HIGH);
+  //  digitalWrite(rightDirection, LOW);
+  //  delay(1000);
+  //  cVal = analogRead(cIRPin);
+  //  while (cVal < thresh) { //Continue rotating in specified direction until the center line sensor reads the black tape value
+  //    cVal = analogRead(cIRPin);
+  //    digitalWrite(leftDirection, HIGH);
+  //    digitalWrite(rightDirection, LOW);
+  //    analogWrite(leftSpeed, lSP - turnMod - resetTMod);
+  //    analogWrite(rightSpeed, rSP - turnMod - resetTMod);
+  //  }
+  //  digitalWrite(leftDirection, LOW);
+  //  digitalWrite(rightDirection, HIGH);
+  //  analogWrite(leftSpeed, lSP);
+  //  analogWrite(rightSpeed, rSP);
+  //  delay(100);
   digitalWrite(leftDirection, HIGH);
-  digitalWrite(rightDirection, LOW);
-  delay(1000);
-  cVal = analogRead(rIRPin);
-  while (cVal < thresh) { //Continue rotating in specified direction until the center line sensor reads the black tape value
-    cVal = analogRead(cIRPin);
-    digitalWrite(leftDirection, HIGH);
-    digitalWrite(rightDirection, LOW);
-    analogWrite(leftSpeed, lSP - turnMod - resetTMod);
-    analogWrite(rightSpeed, rSP - turnMod - resetTMod);
-  }
-  digitalWrite(leftDirection, LOW);
   digitalWrite(rightDirection, HIGH);
-  analogWrite(leftSpeed, lSP);
-  analogWrite(rightSpeed, rSP);
-  delay(50);
+  unsigned long timer = millis();
+  while ((millis() - timer) < 150) {
+    if ((lVal < thresh) && (cVal > thresh) && (rVal < thresh)) { //SET MOTORS TO DRIVE FORWARD
+      analogWrite(leftSpeed, lSP);
+      analogWrite(rightSpeed, rSP);
+    } else if (((lVal > thresh) && (cVal < thresh) && (rVal < thresh)) || ((lVal > thresh) && (cVal > thresh) && (rVal < thresh))) { //LEANING INTO THE RIGHT...SPEED UP RIGHT MOTOR (CALIBRATE)
+      analogWrite(leftSpeed, lSP - 40);
+      analogWrite(rightSpeed, rSP + 20);
+    } else if ((lVal < thresh) && (cVal < thresh) && (rVal > thresh) || ((lVal < thresh) && (cVal > thresh) && (rVal > thresh))) { //LEANING INTO THE LEFT...SPEED UP RIGHT MOTOR (CALIBRATE)
+      analogWrite(leftSpeed, lSP + 20);
+      analogWrite(rightSpeed, rSP - 40);
+    }
+    //    else if( (lVal < thresh) && (cVal < thresh) && (rVal < thresh)){
+    //      analogWrite(leftSpeed, lSP - 80);
+    //      analogWrite(rightSpeed, rSP - 80);
+    //    }
+    else {
+      analogWrite(leftSpeed, lSP - 80);
+      analogWrite(rightSpeed, rSP - 80);
+    }
+
+  }
   analogWrite(leftSpeed, 0);
   analogWrite(rightSpeed, 0);
   cd = 0;
