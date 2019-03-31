@@ -97,27 +97,27 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   Serial.println("BEGINING LOOP()");
-  xIn = 4;
-  yIn = 5;
-  dIn = 0;
-  GoToDice(xIn, yIn, dIn);
-  approachDice();
-  GoToBin(type);
-  approachBin();
-  xIn = 1;
-  yIn = 4;
-  dIn = 3;
-  GoToDice(xIn, yIn, dIn);
-  approachDice();
-  GoToBin(type);
-  approachBin();
-  xIn = 5;
-  yIn = 5;
-  dIn = 0;
-  GoToDice(xIn, yIn, dIn);
-  approachDice();
-  GoToBin(type);
-  approachBin();
+//  xIn = 4;
+//  yIn = 5;
+//  dIn = 0;
+//  GoToDice(xIn, yIn, dIn);
+//  approachDice();
+//  GoToBin(type);
+//  approachBin();
+//  xIn = 1;
+//  yIn = 4;
+//  dIn = 3;
+//  GoToDice(xIn, yIn, dIn);
+//  approachDice();
+//  GoToBin(type);
+//  approachBin();
+//  xIn = 5;
+//  yIn = 5;
+//  dIn = 0;
+//  GoToDice(xIn, yIn, dIn);
+//  approachDice();
+//  GoToBin(type);
+//  approachBin();
   xIn = 5;
   yIn = 2;
   dIn = 1;
@@ -190,6 +190,12 @@ void GoToDice(int xIn1, int yIn1, int dIn1)
 
 void GoToBin(int typeIn)//left-0, middle-1 or right-2
 {
+  if( dIn == 3 ){
+    cx = cx - 1;
+  }
+  else if ( dIn == 1 ) {
+    cx = cx + 1;
+  }
   y = 0;
   x = typeIn + 2; //gives location of bin depending on starting position
   Serial.println("Cx:" +(String)cx);
@@ -234,7 +240,7 @@ void GoToBin(int typeIn)//left-0, middle-1 or right-2
 
   }
   if (cy != y) { //if current y coordinate is less than the objective y then move forward until current y is equal to that of the objective
-    forward(cy - y);
+    forward(cy - y-1);
     cy = y;
   }
   analogWrite(leftSpeed, lSP - 40);
