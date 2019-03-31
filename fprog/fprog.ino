@@ -80,13 +80,52 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  Serial.println("BEGINING LOOP()");
-  GoToDice(1, 5, 3);
-  approach();
-  Serial.println("go to bin function will be called");
-  GoToBin(0);
-  delay(10000);
+  xIn = 4;
+  yIn = 5;
+  dIn = 0;
+  GoToDice(xIn, yIn, dIn);
+  approachDice();
+  GoToBin(type);
+  approachBin();
+
+
+  xIn = 1;
+  yIn = 4;
+  dIn = 3;
+  GoToDice(xIn, yIn, dIn);
+  approachDice();
+  GoToBin(type);
+  approachBin();
+  xIn = 5;
+  yIn = 4;
+  dIn = 1;
+  GoToDice(xIn, yIn, dIn);
+  approachDice();
+  GoToBin(type);
+  approachBin();
+  xIn = 5;
+  yIn = 5;
+  dIn = 3;
+  GoToDice(xIn, yIn, dIn);
+  approachDice();
+  GoToBin(type);
+  approachBin();
+  xIn = 5;
+  yIn = 2;
+  dIn = 1;
+  GoToDice(xIn, yIn, dIn);
+  approachDice();
+  GoToBin(type);
+  approachBin();
+
+  xIn = 5;
+  yIn = 3;
+  dIn = 1;
+  GoToDice(xIn, yIn, dIn);
+  approachDice();
+  GoToBin(type);
+  approachBin();
+  exit(0);
 }
 
 //Function for robot to move to a specified ball's location

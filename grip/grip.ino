@@ -1,4 +1,4 @@
-#define GRIPTHRESHOLD 300
+#define GRIPTHRESHOLD 600
 #include <Servo.h>
 
 
@@ -6,7 +6,7 @@ int panPIN = 8;
 int tiltPIN = 9;
 int gripPIN = 10;
 
-int forceReading = 1000;
+int forceReading = 500;
 
 int forceSensor = A4;
 
@@ -17,7 +17,7 @@ int rightDirection = 7;
 
 Servo pan, tilt, grip;
 
-void setup(){
+void setup() {
 
   Serial.begin(9600);
   pan.attach(panPIN);
@@ -28,7 +28,7 @@ void setup(){
   pinMode(leftDirection, OUTPUT);
   pinMode(rightSpeed, OUTPUT);
   pinMode(rightDirection, OUTPUT);
-  pinMode(forceSensor,INPUT);
+  pinMode(forceSensor, INPUT);
 
 
   analogWrite(leftSpeed, 0);
@@ -37,28 +37,36 @@ void setup(){
   pan.write(90);
   tilt.write(75);
   grip.write(90);
-  
+
 
 }
 
-void loop(){
+void loop() {
   delay(2500);
   closeGrip();
-  
+//  forceReading = analogRead(forceSensor);
+//  Serial.println(forceReading);
+
 }
 
-void closeGrip(){
-  int i = 90;
-  
+void closeGrip() {
+  int i = 0;
+  int x = 160;
+  while (x > 70) {
+    tilt.write(x);
+    x--;
+    delay(10);
+  }
+
   forceReading = analogRead(forceSensor);
-  while(forceReading > GRIPTHRESHOLD){
+  while (forceReading < GRIPTHRESHOLD) {
     forceReading = analogRead(forceSensor);
     Serial.println(forceReading);
     i++;
-    grip.write(i);
-    delay(50);
+    int j = i % 160;
+    grip.write(j);
+    delay(20);
   }
+  tilt.write(200);
   Serial.println("OBJECT GRABBED");
 }
-
-

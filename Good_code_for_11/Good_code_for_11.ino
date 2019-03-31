@@ -1,6 +1,6 @@
 #include <Servo.h>
 
-int type = 2;//initial position. left-0, middle-1, right-2
+int type = 0;//initial position. left-0, middle-1, right-2
 
 int cy = 0;
 int cx = 0;
@@ -11,25 +11,25 @@ int d = 0;
 int xIn;
 int yIn;
 int dIn;
-int delayTLeft = 600; //500 when half bat 400 when full bat
-int delayTRight = 600; //500 when half bat 400 when full bat
-int delayBeforeT = 200; // 350 when half 250 when full
-int lSP = 200;
-int rSP = 190;
+int delayTLeft = 700; //500 when half bat 400 when full bat
+int delayTRight = 700; //500 when half bat 400 when full bat
+int delayBeforeT = 250; // 350 when half 250 when full
+int lSP = 190;
+int rSP = 200;
 int turnMod = 90; // 80 when half 90 when full
 int resetTMod = 10; // subtracts from turn speed after drop dice. 10 when full -10 when half;
-int turnADPD = 150; // 150 when full 200 when half
-int intersectMilli = 120; // 130 full 180 low
+int turnADPD = 140; // 150 when full 200 when half
+int intersectMilli = 150; // 130 full 180 low
 
 int leftBumper = 1;
 int rightBumper = 1;
 
-int IRpin = A5;
+int IRpin = A3;
 
 int forceSensor = A4;
 int forceReading = 1027;
-int gripThresh = 400;
-int fIRThresh = 300;
+int gripThresh = 700;
+int fIRThresh = 400;
 
 
 int lIRPin = A0;
@@ -48,7 +48,7 @@ int leftSpeed = 5;
 int leftDirection = 4;
 int rightSpeed = 6;
 int rightDirection = 7;
-int thresh = 880;
+int thresh = 900;
 unsigned long lastInter = 0;
 int IRVal = 0;
 
@@ -61,8 +61,8 @@ int gripPIN = 10;
 
 Servo pan, tilt, grip;
 //--------------------------------
-int lBump = 0;
-int rBump = 11;
+int lBump = 2;
+int rBump = 3;
 
 void setup() {
   // put your setup code here, to run once:
@@ -86,9 +86,9 @@ void setup() {
   pinMode(IRpin, INPUT);
   pinMode(forceSensor, INPUT);
 
-  pan.write(95);
-  tilt.write(200);
-  grip.write(75);
+  pan.write(100);
+  tilt.write(190);
+  grip.write(0);
 
   Serial.begin(9600);
 
@@ -97,7 +97,7 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   Serial.println("BEGINING LOOP()");
-  xIn = 4;
+  xIn = 2;
   yIn = 5;
   dIn = 0;
   GoToDice(xIn, yIn, dIn);
@@ -107,13 +107,6 @@ void loop() {
 
 
   xIn = 1;
-  yIn = 4;
-  dIn = 3;
-  GoToDice(xIn, yIn, dIn);
-  approachDice();
-  GoToBin(type);
-  approachBin();
-  xIn = 5;
   yIn = 5;
   dIn = 0;
   GoToDice(xIn, yIn, dIn);
@@ -121,15 +114,22 @@ void loop() {
   GoToBin(type);
   approachBin();
   xIn = 5;
-  yIn = 2;
+  yIn = 4;
   dIn = 1;
   GoToDice(xIn, yIn, dIn);
   approachDice();
   GoToBin(type);
   approachBin();
-  xIn = 5;
+  xIn = 1;
+  yIn = 2;
+  dIn = 3;
+  GoToDice(xIn, yIn, dIn);
+  approachDice();
+  GoToBin(type);
+  approachBin();
+  xIn = 1;
   yIn = 3;
-  dIn = 1;
+  dIn = 3;
   GoToDice(xIn, yIn, dIn);
   approachDice();
   GoToBin(type);
@@ -350,7 +350,8 @@ void forward(int numOfIntersections) {
     if (IRVal > fIRThresh) {
       analogWrite(leftSpeed, 0);
       analogWrite(rightSpeed, 0);
-    } else if ((lVal < thresh) && (cVal > thresh) && (rVal < thresh)) { //SET MOTORS TO DRIVE FORWARD
+    }
+    else  if ((lVal < thresh) && (cVal > thresh) && (rVal < thresh)) { //SET MOTORS TO DRIVE FORWARD
       analogWrite(leftSpeed, lSP);
       analogWrite(rightSpeed, rSP);
     } else if ((lVal > thresh) && (cVal < thresh) && (rVal < thresh)) { //LEANING INTO THE RIGHT...SPEED UP RIGHT MOTOR (CALIBRATE)
@@ -512,7 +513,7 @@ void turnWithDice()
   digitalWrite(leftDirection, HIGH);
   digitalWrite(rightDirection, HIGH);
   unsigned long timer = millis();
-  while ((millis() - timer) < 300) {
+  while ((millis() - timer) < 200) {
     if ((lVal < thresh) && (cVal > thresh) && (rVal < thresh)) { //SET MOTORS TO DRIVE FORWARD
       analogWrite(leftSpeed, lSP);
       analogWrite(rightSpeed, rSP);
@@ -586,8 +587,8 @@ void turnWithDice()
 }
 
 void closeGrip() {
-  int i = 75;
-  int x = 200;
+  int i = 0;
+  int x = 190;
   while (x > 65) {
     tilt.write(x);
     x--;
@@ -595,27 +596,34 @@ void closeGrip() {
   }
 
   forceReading = analogRead(forceSensor);
-  while (forceReading > gripThresh) {
+
+
+  while (forceReading < gripThresh) {
     forceReading = analogRead(forceSensor);
-    Serial.println(forceReading);
+
     i++;
-    int j = i % 200;
+    int j = i % 110;
+
     grip.write(j);
     delay(20);
+
+    if (j == 0) {
+      delay(500);
+    }
   }
-  tilt.write(200);
+  tilt.write(190);
   Serial.println("OBJECT GRABBED");
 }
 
 void dropDice() {
   analogWrite(leftSpeed, 0);
   analogWrite(rightSpeed, 0);
-  int x = 200;
-  while (x > 70) {
+  int x = 190;
+  while (x > 65) {
     tilt.write(x);
     x--;
     if (x == 80) {
-      grip.write(75);
+      grip.write(0);
       Serial.println("Dice Dropped");
     }
   }
@@ -783,6 +791,6 @@ void approachBin() {
   analogWrite(rightSpeed, 0);
   cd = 0;
   delay(50);
-  tilt.write(200);
+  tilt.write(190);
   delay(50);
 }
