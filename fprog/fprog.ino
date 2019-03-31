@@ -82,7 +82,7 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   Serial.println("BEGINING LOOP()");
-  GoToDice(1, 5, 3);
+  GoToDice(3, 5, 0);
   approach();
   Serial.println("go to bin function will be called");
   GoToBin(0);
@@ -197,8 +197,8 @@ void forward(int numOfIntersections) {
       Serial.print(" || ");
       Serial.println(rVal); */
     if ((lVal < thresh) && (cVal > thresh) && (rVal < thresh)) { //SET MOTORS TO DRIVE FORWARD
-      analogWrite(leftSpeed, 168);
-      analogWrite(rightSpeed, 148);
+      analogWrite(leftSpeed, 148);
+      analogWrite(rightSpeed, 128);
     } else if ((lVal > thresh) && (cVal < thresh) && (rVal < thresh)) { //LEANING INTO THE RIGHT...SPEED UP RIGHT MOTOR (CALIBRATE)
       analogWrite(leftSpeed, 108);
       analogWrite(rightSpeed, 128);
