@@ -183,29 +183,34 @@ void GoToDice(int xIn1, int yIn1, int dIn1)
   }
   analogWrite(leftSpeed, lSP);
   analogWrite(rightSpeed, rSP);
-
+  Serial.print("cd:" + (String)cd);
+  Serial.print("cx:" + (String)cx);
+  Serial.print("cy:" + (String)cy);
 }
 
 void GoToBin(int typeIn)//left-0, middle-1 or right-2
 {
   y = 0;
   x = typeIn + 2; //gives location of bin depending on starting position
-  int a = 0;
-  Serial.println(cx);
-  Serial.println(cy);
+  Serial.println("Cx:" +(String)cx);
+  Serial.println("Cd:" +(String)cd);
 
   if (cd == 2)
   {
-
     Serial.println("direction fix");
     if (cx < x) {
       forward(1);
       turn(1);
+      Serial.println("Cx:" +(String)cx);
+      Serial.println("Cd:" +(String)cd);
+
+      cd = 3;
     }
     else if (cx > x) {
-      
+
       forward(1);
       turn(0);
+      cd = 1;
     }
   }
 
@@ -229,14 +234,11 @@ void GoToBin(int typeIn)//left-0, middle-1 or right-2
 
   }
   if (cy != y) { //if current y coordinate is less than the objective y then move forward until current y is equal to that of the objective
-    if (yIn == 5 && dIn == 0) {
-      cy = cy - 1;
-    }
-    forward(cy - y - 1);
+    forward(cy - y);
     cy = y;
   }
-  analogWrite(leftSpeed, lSP - 60);
-  analogWrite(rightSpeed, rSP - 60);
+  analogWrite(leftSpeed, lSP - 40);
+  analogWrite(rightSpeed, rSP - 40);
 
   //drop into bin function
 }
@@ -250,11 +252,11 @@ void followLineF(int speedMod)//speedMod adds on to speed;
   digitalWrite(leftDirection, HIGH); //Set left motor direction to forward
   digitalWrite(rightDirection, HIGH); //Set right motor direction to forward
 
-  Serial.print(lVal);
-  Serial.print(" || ");
-  Serial.print(cVal);
-  Serial.print(" || ");
-  Serial.println(rVal);
+  //  Serial.print(lVal);
+  //  Serial.print(" || ");
+  //  Serial.print(cVal);
+  //  Serial.print(" || ");
+  //  Serial.println(rVal);
   if (IRVal > fIRThresh) {
     analogWrite(leftSpeed, 0);
     analogWrite(rightSpeed, 0);
@@ -280,49 +282,34 @@ void forward(int numOfIntersections) {
   int intersectionCount = 0;
   digitalWrite(leftDirection, HIGH); //Set left motor direction to forward
   digitalWrite(rightDirection, HIGH); //Set right motor direction to forward
-
-  //While not at the desired intersection, keep moving forward
-  while (intersectionCount < numOfIntersections) {
+  while (intersectionCount < numOfIntersections) {//While not at the desired intersection, keep moving forward
     followLineF(0);
     int count = 0;
-    while ( count < 4) {
-      if ((lVal > thresh) && (cVal > thresh) && (rVal > thresh) && (plVal > thresh) && (pcVal > thresh) && (prVal > thresh)) { //At an intersection. Increment intersection counter
-        //      if ((millis() - lastInter) > intersectMilli) {
-        //        Serial.println("INTERSECTION");
-        //
-        //        intersectionCount++;
-        //        Serial.println(intersectionCount);
-        //        lastInter = millis();
-        //      }
-        lVal = analogRead(lIRPin);
-        cVal = analogRead(cIRPin);
-        rVal = analogRead(rIRPin);
-        int i = 0;
-        int tCVal = 0;
-        int tLVal = 0;
-        int tRVal = 0;
-        while ( i < 10) {
-          followLineF(0);
-          i++;
-          lVal = analogRead(lIRPin);
-          cVal = analogRead(cIRPin);
-          rVal = analogRead(rIRPin);
-          tCVal = tCVal + cVal;
-          tRVal = tRVal + rVal;
-          tLVal = tLVal + lVal;
-        }
-        plVal = (tLVal / 10);
-        pcVal = (tCVal / 10);
-        prVal = (tRVal / 10);
-      }
-      count++;
+    Serial.println("intersection loop");
+    while (count < 4) {
+      followLineF(0);
+      //      Serial.println("count loop");
+      if ((analogRead(lIRPin) > thresh) && (analogRead(rIRPin) > thresh)) count++;
+      else count = 0;
+      delay(1);
     }
-    intersectionCount++;
-    Serial.println("Intersection: " + (String)intersectionCount );
+    int temp = intersectionCount;
+    count = 0;
+    while (intersectionCount < temp + 1) {
+      while (count < 5) {
+        followLineF(0);
+        if ((analogRead(lIRPin) < thresh) || (analogRead(rIRPin) < thresh)) count++;
+        else count = 0;
+        delay(1);
+      }
+      intersectionCount++;
+      Serial.println("Intersections" + (String) intersectionCount);
+    }
+
   }
-  //  analogWrite(leftSpeed, 0);
-  //  analogWrite(rightSpeed, 0);
-  //  delay(100);
+  analogWrite(leftSpeed, 0);
+  analogWrite(rightSpeed, 0);
+  delay(100);
 }
 
 //Function to turn in a specified direction until a black line is hit
@@ -376,18 +363,6 @@ void turn(int dir) {
     delay(100);
     cd = (cd + 1) % 4; //Update direction robot is facing
   }
-
-  //  if (dir == 1) {
-  //    digitalWrite(leftDirection, LOW);
-  //    digitalWrite(rightDirection, HIGH);
-  //    analogWrite(leftSpeed, lSP - turnMod);
-  //    analogWrite(rightSpeed, rSP - turnMod);
-  //  } else {
-  //    digitalWrite(leftDirection, HIGH);
-  //    digitalWrite(rightDirection, LOW);
-  //    analogWrite(leftSpeed, lSP - turnMod);
-  //    analogWrite(rightSpeed, rSP - turnMod);
-  //  }
   Serial.println("sweep");
   lVal = analogRead(lIRPin);
   cVal = analogRead(cIRPin);
@@ -432,23 +407,21 @@ void turnWithDice()
   followLineF(0);
   delay(300);
   turn(1);
-  if (cd == 0) { //Update direction robot is facing
+  if (dIn == 0) { //Update direction robot is facing
     cd = 2;
   }
-  else if (cd == 1) {
+  else if (dIn == 1) {
     cd = 3;
   }
-  else if (cd == 2)
-  {
-    cd = 0;
-  }
-  else //cd == 3
+  else if (dIn == 3)
   {
     cd = 1;
   }
+  
   analogWrite(leftSpeed, 0);
   analogWrite(rightSpeed, 0);
   delay(50);
+  
 }
 
 void closeGrip() {
@@ -463,7 +436,7 @@ void closeGrip() {
   forceReading = analogRead(forceSensor);
   while (forceReading > gripThresh) {
     forceReading = analogRead(forceSensor);
-//    Serial.println(forceReading);
+    //    Serial.println(forceReading);
     i++;
     int j = i % 200;
     grip.write(j);
@@ -489,18 +462,18 @@ void dropDice() {
 
 
 void approachDice() {
-  if (cd == 3)
-  {
-    cx--;
-  }
-  else if (cd == 0)
-  {
-    cy++;
-  }
-  else if (cd == 1)
-  {
-    cx++;
-  }
+//  if (dIn == 3)
+//  {
+//    cx--;
+//  }
+//  else if (dIn == 0)
+//  {
+//    cy++;
+//  }
+//  else if (dIn == 1)
+//  {
+//    cx++;
+//  }
 
   IRVal = analogRead(IRpin);
   leftBumper = digitalRead(lBump);
@@ -511,7 +484,7 @@ void approachDice() {
     rightBumper = digitalRead(rBump);
     digitalWrite(leftDirection, HIGH);
     digitalWrite(rightDirection, HIGH);
-    fIRThresh = 600;
+    fIRThresh = 800;
     followLineF(0);
   }
   fIRThresh = 300;
@@ -537,7 +510,7 @@ void approachBin() {
     rightBumper = digitalRead(rBump);
     digitalWrite(leftDirection, HIGH);
     digitalWrite(rightDirection, HIGH);
-    fIRThresh = 600;
+    fIRThresh = 800;
     followLineF(0);
   }
   fIRThresh = 300;
