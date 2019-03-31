@@ -1,10 +1,25 @@
 #include <Servo.h>
 
-int type = 0; //initial position. left-0, middle-1, right-2
+int type = 2;//initial position. left-0, middle-1, right-2
 
 int cy = 0;
-int cx = 2;
+int cx = 0;
 int cd = 0;
+int x = 0;
+int y = 0;
+int d = 0;
+int xIn;
+int yIn;
+int dIn;
+int delayTLeft = 600; //500 when half bat 400 when full bat
+int delayTRight = 600; //500 when half bat 400 when full bat
+int delayBeforeT = 200; // 350 when half 250 when full
+int lSP = 200;
+int rSP = 190;
+int turnMod = 90; // 80 when half 90 when full
+int resetTMod = 10; // subtracts from turn speed after drop dice. 10 when full -10 when half;
+int turnADPD = 150; // 150 when full 200 when half
+int intersectMilli = 120; // 130 full 180 low
 
 int leftBumper = 1;
 int rightBumper = 1;
@@ -13,8 +28,8 @@ int IRpin = A5;
 
 int forceSensor = A4;
 int forceReading = 1027;
-int gripThresh = 300;
-int fIRThresh = 800;
+int gripThresh = 400;
+int fIRThresh = 300;
 
 
 int lIRPin = A0;
@@ -33,7 +48,7 @@ int leftSpeed = 5;
 int leftDirection = 4;
 int rightSpeed = 6;
 int rightDirection = 7;
-int thresh = 850;
+int thresh = 880;
 unsigned long lastInter = 0;
 int IRVal = 0;
 
@@ -71,9 +86,9 @@ void setup() {
   pinMode(IRpin, INPUT);
   pinMode(forceSensor, INPUT);
 
-  pan.write(90);
+  pan.write(95);
   tilt.write(200);
-  grip.write(140);
+  grip.write(75);
 
   Serial.begin(9600);
 
@@ -82,16 +97,54 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   Serial.println("BEGINING LOOP()");
-  GoToDice(3, 5, 0);
-  approach();
-  Serial.println("go to bin function will be called");
-  GoToBin(0);
-  delay(10000);
+  xIn = 4;
+  yIn = 5;
+  dIn = 0;
+  GoToDice(xIn, yIn, dIn);
+  approachDice();
+  GoToBin(type);
+  approachBin();
+
+
+  xIn = 1;
+  yIn = 4;
+  dIn = 3;
+  GoToDice(xIn, yIn, dIn);
+  approachDice();
+  GoToBin(type);
+  approachBin();
+  xIn = 5;
+  yIn = 5;
+  dIn = 0;
+  GoToDice(xIn, yIn, dIn);
+  approachDice();
+  GoToBin(type);
+  approachBin();
+  xIn = 5;
+  yIn = 2;
+  dIn = 1;
+  GoToDice(xIn, yIn, dIn);
+  approachDice();
+  GoToBin(type);
+  approachBin();
+  xIn = 5;
+  yIn = 3;
+  dIn = 1;
+  GoToDice(xIn, yIn, dIn);
+  approachDice();
+  GoToBin(type);
+  approachBin();
+  exit(0);
 }
 
 //Function for robot to move to a specified ball's location
-void GoToDice(int x, int y, int d)
+void GoToDice(int xIn1, int yIn1, int dIn1)
 {
+  x = xIn1;
+  y = yIn1;
+  d = dIn1;
+  cx = type + 2;
+  cy = 0;
   if (cy < y) { //if current y coordinate is less than the objective y then move forward until current y is equal to that of the objective
     forward(y - cy);
     cy = y;
@@ -130,30 +183,120 @@ void GoToDice(int x, int y, int d)
       turn(0);
     }
   }
-
-
+  analogWrite(leftSpeed, lSP);
+  analogWrite(rightSpeed, rSP);
 
 }
 
-void GoToBin(int type)//left-0, middle-1 or right-2
+void GoToBin(int typeIn)//left-0, middle-1 or right-2
 {
-  int y = 0;
-  int x = type + 2; //gives location of bin depending on starting position
-
+  y = 0;
+  x = typeIn + 2; //gives location of bin depending on starting position
+  int a = 0;
   Serial.println(cx);
   Serial.println(cy);
-  Serial.println("Time to go to the bin");
 
+  if (cd == 2)
+  {
 
+    Serial.println("direction fix");
+    //      forward(1);
+    if (cx < x) {
+      //      unsigned long timer = millis();
+      //      digitalWrite(rightDirection, HIGH);
+      //      digitalWrite(leftDirection, HIGH);
+      //      analogWrite(leftSpeed, 130);
+      //      analogWrite(rightSpeed, 140);
+      //      delay(100);
+      //      while ((millis() - timer) < turnADPD) {
+      //        if ((lVal < thresh) && (cVal > thresh) && (rVal < thresh)) { //SET MOTORS TO DRIVE FORWARD
+      //          analogWrite(leftSpeed, lSP - a);
+      //          analogWrite(rightSpeed, rSP - a);
+      //        } else if (((lVal > thresh) && (cVal < thresh) && (rVal < thresh)) || ((lVal > thresh) && (cVal > thresh) && (rVal < thresh))) { //LEANING INTO THE RIGHT...SPEED UP RIGHT MOTOR (CALIBRATE)
+      //          analogWrite(leftSpeed, lSP - 80 - a);
+      //          analogWrite(rightSpeed, rSP - 20 - a);
+      //        } else if ((lVal < thresh) && (cVal < thresh) && (rVal > thresh) || ((lVal < thresh) && (cVal > thresh) && (rVal > thresh))) { //LEANING INTO THE LEFT...SPEED UP RIGHT MOTOR (CALIBRATE)
+      //          analogWrite(leftSpeed, lSP - 20 - a);
+      //          analogWrite(rightSpeed, rSP - 80 - a);
+      //        } else {
+      //          analogWrite(leftSpeed, lSP - 30);
+      //          analogWrite(rightSpeed, rSP - 30);
+      //        }
+      //      }
+      //      int a = 40;
+      //      lVal = analogRead(lIRPin);
+      //      cVal = analogRead(cIRPin);
+      //      rVal = analogRead(rIRPin);
+      //      digitalWrite(leftDirection, HIGH);
+      //      digitalWrite(rightDirection, HIGH);
+      //      if ((lVal < thresh) && (cVal > thresh) && (rVal < thresh)) { //SET MOTORS TO DRIVE FORWARD
+      //        analogWrite(leftSpeed, lSP - turnMod + a);
+      //        analogWrite(rightSpeed, rSP - turnMod + a);
+      //      } else if ((lVal > thresh) && (cVal < thresh) && (rVal < thresh)) { //LEANING INTO THE RIGHT...SPEED UP RIGHT MOTOR (CALIBRATE)
+      //        analogWrite(leftSpeed, lSP - turnMod - 40 + a);
+      //        analogWrite(rightSpeed, rSP - turnMod + 20 + a);
+      //      } else if ((lVal < thresh) && (cVal < thresh) && (rVal > thresh)) { //LEANING INTO THE LEFT...SPEED UP RIGHT MOTOR (CALIBRATE)
+      //        analogWrite(leftSpeed, lSP - turnMod + 20 + a);
+      //        analogWrite(rightSpeed, rSP - turnMod - 40 + a);
+      //      }
+      //      delay(turnADPD);
+      forward(1);
+      turn(1);
+      //         cx = cx + 1;
+    }
+    else if (cx > x) {
+      //      unsigned long timer = millis();
+      //      digitalWrite(rightDirection, HIGH);
+      //      digitalWrite(leftDirection, HIGH);
+      //      analogWrite(leftSpeed, 130);
+      //      analogWrite(rightSpeed, 140);
+      //      delay(100);
+      //      while ((millis() - timer) < turnADPD) {
+      //        if ((lVal < thresh) && (cVal > thresh) && (rVal < thresh)) { //SET MOTORS TO DRIVE FORWARD
+      //          analogWrite(leftSpeed, lSP - a);
+      //          analogWrite(rightSpeed, rSP - a);
+      //        } else if (((lVal > thresh) && (cVal < thresh) && (rVal < thresh)) || ((lVal > thresh) && (cVal > thresh) && (rVal < thresh))) { //LEANING INTO THE RIGHT...SPEED UP RIGHT MOTOR (CALIBRATE)
+      //          analogWrite(leftSpeed, lSP - 80 - a);
+      //          analogWrite(rightSpeed, rSP - 20 - a);
+      //        } else if ((lVal < thresh) && (cVal < thresh) && (rVal > thresh) || ((lVal < thresh) && (cVal > thresh) && (rVal > thresh))) { //LEANING INTO THE LEFT...SPEED UP RIGHT MOTOR (CALIBRATE)
+      //          analogWrite(leftSpeed, lSP - 20 - a);
+      //          analogWrite(rightSpeed, rSP - 80 - a);
+      //        } else {
+      //          analogWrite(leftSpeed, lSP - 80);
+      //          analogWrite(rightSpeed, rSP - 80);
+      //        }
+      //      }
+      //      int a = 40;
+      //      lVal = analogRead(lIRPin);
+      //      cVal = analogRead(cIRPin);
+      //      rVal = analogRead(rIRPin);
+      //      digitalWrite(leftDirection, HIGH);
+      //      digitalWrite(rightDirection, HIGH);
+      //      if ((lVal < thresh) && (cVal > thresh) && (rVal < thresh)) { //SET MOTORS TO DRIVE FORWARD
+      //        analogWrite(leftSpeed, lSP - turnMod + a);
+      //        analogWrite(rightSpeed, rSP - turnMod + a);
+      //      } else if ((lVal > thresh) && (cVal < thresh) && (rVal < thresh)) { //LEANING INTO THE RIGHT...SPEED UP RIGHT MOTOR (CALIBRATE)
+      //        analogWrite(leftSpeed, lSP - turnMod - 40 + a);
+      //        analogWrite(rightSpeed, rSP - turnMod + 20 + a);
+      //      } else if ((lVal < thresh) && (cVal < thresh) && (rVal > thresh)) { //LEANING INTO THE LEFT...SPEED UP RIGHT MOTOR (CALIBRATE)
+      //        analogWrite(leftSpeed, lSP - turnMod + 20 + a);
+      //        analogWrite(rightSpeed, rSP - turnMod - 40 + a);
+      //      }
+      //      delay(turnADPD);
+      forward(1);
+      turn(0);
+      //         cx = cx - 1;
+    }
+    //      else if (cx == x){
+    //
+    //      }
+    //      exit(0);
+  }
 
   if (cx != x) { //if the objective is not directly infront of the robot then turn in the direction of the ball and go forward until the ball is in front of the robot
     if (cx < x) {
       Serial.println("Going forward");
       forward(x - cx);
-      Serial.println("Need to turn here");
-      analogWrite(leftSpeed, 0);
-      analogWrite(rightSpeed, 0);
-      delay(200);
       cx = x;
       turn(0);//turn right
 
@@ -170,9 +313,15 @@ void GoToBin(int type)//left-0, middle-1 or right-2
 
   }
   if (cy != y) { //if current y coordinate is less than the objective y then move forward until current y is equal to that of the objective
+    if (yIn == 5 && dIn == 0) {
+      cy = cy - 1;
+    }
     forward(cy - y - 1);
     cy = y;
   }
+  analogWrite(leftSpeed, lSP - 60);
+  analogWrite(rightSpeed, rSP - 60);
+
   //drop into bin function
 }
 
@@ -190,25 +339,34 @@ void forward(int numOfIntersections) {
     lVal = analogRead(lIRPin);
     cVal = analogRead(cIRPin);
     rVal = analogRead(rIRPin);
+    IRVal = analogRead(IRpin);
 
-    /*  Serial.print(lVal);
-      Serial.print(" || ");
-      Serial.print(cVal);
-      Serial.print(" || ");
-      Serial.println(rVal); */
-    if ((lVal < thresh) && (cVal > thresh) && (rVal < thresh)) { //SET MOTORS TO DRIVE FORWARD
-      analogWrite(leftSpeed, 148);
-      analogWrite(rightSpeed, 128);
+
+    Serial.print(lVal);
+    Serial.print(" || ");
+    Serial.print(cVal);
+    Serial.print(" || ");
+    Serial.println(rVal);
+    if (IRVal > fIRThresh) {
+      analogWrite(leftSpeed, 0);
+      analogWrite(rightSpeed, 0);
+    } else if ((lVal < thresh) && (cVal > thresh) && (rVal < thresh)) { //SET MOTORS TO DRIVE FORWARD
+      analogWrite(leftSpeed, lSP);
+      analogWrite(rightSpeed, rSP);
     } else if ((lVal > thresh) && (cVal < thresh) && (rVal < thresh)) { //LEANING INTO THE RIGHT...SPEED UP RIGHT MOTOR (CALIBRATE)
-      analogWrite(leftSpeed, 108);
-      analogWrite(rightSpeed, 128);
+      analogWrite(leftSpeed, lSP - 80);
+      analogWrite(rightSpeed, rSP);
     } else if ((lVal < thresh) && (cVal < thresh) && (rVal > thresh)) { //LEANING INTO THE LEFT...SPEED UP RIGHT MOTOR (CALIBRATE)
-      analogWrite(leftSpeed, 208);
-      analogWrite(rightSpeed, 128);
+      analogWrite(leftSpeed, lSP);
+      analogWrite(rightSpeed, rSP - 80);
+    }
+    else {
+      analogWrite(leftSpeed, lSP - 30);
+      analogWrite(rightSpeed, rSP - 30);
     }
 
     if ((lVal > thresh) && (cVal > thresh) && (rVal > thresh) && (plVal > thresh) && (pcVal > thresh) && (prVal > thresh)) { //At an intersection. Increment intersection counter
-      if ((millis() - lastInter) > 200) {
+      if ((millis() - lastInter) > intersectMilli) {
         Serial.println("INTERSECTION");
 
         intersectionCount++;
@@ -221,54 +379,129 @@ void forward(int numOfIntersections) {
     pcVal = cVal;
     prVal = rVal;
   }
-  analogWrite(leftSpeed, 0);
-  analogWrite(rightSpeed, 0);
-  delay(200);
+  //  analogWrite(leftSpeed, 0);
+  //  analogWrite(rightSpeed, 0);
+  //  delay(100);
 }
 
 //Function to turn in a specified direction until a black line is hit
 void turn(int dir) {
   //drive a little past the intersection
-  //delay(50);
-  analogWrite(leftSpeed, 148);
-  analogWrite(rightSpeed, 128);
+  delay(50);
+  analogWrite(leftSpeed, lSP - turnMod);
+  analogWrite(rightSpeed, rSP - turnMod);
   digitalWrite(leftDirection, HIGH);
   digitalWrite(rightDirection, HIGH);
-  delay(400);
+  delay(delayBeforeT);
+
 
   if (dir == 1) { //Begin turning counter-clockwise to ensure that center line sensor is not scaning the black tape
-    analogWrite(leftSpeed, 100);
-    analogWrite(rightSpeed, 80);
+    analogWrite(leftSpeed, lSP - turnMod);
+    analogWrite(rightSpeed, rSP - turnMod);
     digitalWrite(leftDirection, LOW);
     digitalWrite(rightDirection, HIGH);
-    delay(550);
+    delay(delayTLeft);
+    cVal = analogRead(cIRPin);
+    while (cVal < thresh) { //Continue rotating in specified direction until the center line sensor reads the black tape value
+      cVal = analogRead(cIRPin);
+      if ((cVal > thresh) && (pcVal > thresh)) { //At an intersection. Increment intersection counter
+        if ((millis() - lastInter) > 100) {
+          analogWrite(leftSpeed, 0);
+          analogWrite(rightSpeed, 0);
+          lastInter = millis();
+
+        }
+      }
+      pcVal = cVal;
+    }
     if (cd == 0) { //Update direction robot is facing
       cd = 3;
     } else {
       cd = cd - 1;
     }
   }
+
   else { //Begin turning clockwise to ensure that center line sensor is not scaning the black tape
-    analogWrite(leftSpeed, 100);
-    analogWrite(rightSpeed, 80);
+    analogWrite(leftSpeed, lSP - turnMod);
+    analogWrite(rightSpeed, rSP - turnMod);
     digitalWrite(leftDirection, HIGH);
     digitalWrite(rightDirection, LOW);
-    delay(300);
+    delay(delayTRight);
+    cVal = analogRead(cIRPin);
+    while (cVal < thresh) { //Continue rotating in specified direction until the center line sensor reads the black tape value
+      cVal = analogRead(cIRPin);
+      if ((cVal > thresh) && (pcVal > thresh)) { //At an intersection. Increment intersection counter
+        if ((millis() - lastInter) > 100) {
+          analogWrite(leftSpeed, 0);
+          analogWrite(rightSpeed, 0);
+          lastInter = millis();
+        }
+      }
+      pcVal = cVal;
+    }
     cd = (cd + 1) % 4; //Update direction robot is facing
   }
-  cVal = analogRead(cIRPin);
-  while (cVal < thresh) { //Continue rotating in specified direction until the center line sensor reads the black tape value
-    cVal = analogRead(cIRPin);
-    analogWrite(leftSpeed, 110);
-    analogWrite(rightSpeed, 110);
-    if (dir == 1) {
-      digitalWrite(leftDirection, LOW);
-      digitalWrite(rightDirection, HIGH);
-    } else {
-      digitalWrite(leftDirection, HIGH);
-      digitalWrite(rightDirection, LOW);
-    }
 
+  if (dir == 1) {
+    digitalWrite(leftDirection, LOW);
+    digitalWrite(rightDirection, HIGH);
+    analogWrite(leftSpeed, lSP - turnMod);
+    analogWrite(rightSpeed, rSP - turnMod);
+  } else {
+    digitalWrite(leftDirection, HIGH);
+    digitalWrite(rightDirection, LOW);
+    analogWrite(leftSpeed, lSP - turnMod);
+    analogWrite(rightSpeed, rSP - turnMod);
+  }
+
+  if (dir = 1) {
+    cVal = analogRead(cIRPin);
+    if (cVal < (thresh)) {
+      while (cVal < (thresh)) {
+        cVal = analogRead(cIRPin);
+        digitalWrite(leftDirection, HIGH);
+        digitalWrite(rightDirection, LOW);
+        analogWrite(leftSpeed, lSP - turnMod);
+        analogWrite(rightSpeed, rSP - turnMod);
+        while (cVal < thresh) { //Continue rotating in specified direction until the center line sensor reads the black tape value
+          cVal = analogRead(cIRPin);
+          if ((cVal > thresh) && (pcVal > thresh)) { //At an intersection. Increment intersection counter
+            if ((millis() - lastInter) > 100) {
+              analogWrite(leftSpeed, 0);
+              analogWrite(rightSpeed, 0);
+              lastInter = millis();
+
+            }
+          }
+          pcVal = cVal;
+        }
+      }
+
+    }
+  }
+  else {
+    cVal = analogRead(cIRPin);
+    if (cVal < (thresh)) {
+      while (cVal < (thresh)) {
+        cVal = analogRead(cIRPin);
+        digitalWrite(leftDirection, LOW);
+        digitalWrite(rightDirection, HIGH);
+        analogWrite(leftSpeed, lSP - turnMod);
+        analogWrite(rightSpeed, rSP - turnMod);
+        while (cVal < thresh) { //Continue rotating in specified direction until the center line sensor reads the black tape value
+          cVal = analogRead(cIRPin);
+          if ((cVal > thresh) && (pcVal > thresh)) { //At an intersection. Increment intersection counter
+            if ((millis() - lastInter) > 100) {
+              analogWrite(leftSpeed, 0);
+              analogWrite(rightSpeed, 0);
+              lastInter = millis();
+
+            }
+          }
+          pcVal = cVal;
+        }
+      }
+    }
   }
   analogWrite(leftSpeed, 0);
   analogWrite(rightSpeed, 0);
@@ -276,6 +509,43 @@ void turn(int dir) {
 
 void turnWithDice()
 {
+  digitalWrite(leftDirection, HIGH);
+  digitalWrite(rightDirection, HIGH);
+  unsigned long timer = millis();
+  while ((millis() - timer) < 300) {
+    if ((lVal < thresh) && (cVal > thresh) && (rVal < thresh)) { //SET MOTORS TO DRIVE FORWARD
+      analogWrite(leftSpeed, lSP);
+      analogWrite(rightSpeed, rSP);
+    } else if (((lVal > thresh) && (cVal < thresh) && (rVal < thresh)) || ((lVal > thresh) && (cVal > thresh) && (rVal < thresh))) { //LEANING INTO THE RIGHT...SPEED UP RIGHT MOTOR (CALIBRATE)
+      analogWrite(leftSpeed, lSP - 80);
+      analogWrite(rightSpeed, rSP - 20);
+    } else if ((lVal < thresh) && (cVal < thresh) && (rVal > thresh) || ((lVal < thresh) && (cVal > thresh) && (rVal > thresh))) { //LEANING INTO THE LEFT...SPEED UP RIGHT MOTOR (CALIBRATE)
+      analogWrite(leftSpeed, lSP - 20);
+      analogWrite(rightSpeed, rSP - 80);
+    }
+
+  }
+  analogWrite(leftSpeed, lSP - turnMod + 20);
+  analogWrite(rightSpeed, rSP - turnMod + 20);
+  digitalWrite(leftDirection, HIGH);
+  digitalWrite(rightDirection, LOW);
+  delay(700);
+  analogWrite(leftSpeed, lSP - turnMod + 5);
+  analogWrite(rightSpeed, rSP - turnMod + 5);
+  delay(delayTLeft);
+  cVal = analogRead(cIRPin);
+  while (cVal < thresh) { //Continue rotating in specified direction until the center line sensor reads the black tape value
+    cVal = analogRead(cIRPin);
+    if ((cVal > thresh) && (pcVal > thresh)) { //At an intersection. Increment intersection counter
+      if ((millis() - lastInter) > 100) {
+        analogWrite(leftSpeed, 0);
+        analogWrite(rightSpeed, 0);
+        lastInter = millis();
+
+      }
+    }
+    pcVal = cVal;
+  }
   if (cd == 0) { //Update direction robot is facing
     cd = 2;
   }
@@ -290,63 +560,92 @@ void turnWithDice()
   {
     cd = 1;
   }
-
-
-  analogWrite(leftSpeed, 128);
-  analogWrite(rightSpeed, 100);
-  digitalWrite(leftDirection, HIGH);
-  digitalWrite(rightDirection, LOW);
-  delay(550);
-
-  cVal = analogRead(cIRPin);
-  while (cVal < thresh) { //Continue rotating in specified direction until the center line sensor reads the black tape value
-    cVal = analogRead(cIRPin);
-    analogWrite(leftSpeed, 100);
-    analogWrite(rightSpeed, 100);
-    digitalWrite(leftDirection, HIGH);
-    digitalWrite(rightDirection, LOW);
-
-
-  }
-
+  
   analogWrite(leftSpeed, 0);
   analogWrite(rightSpeed, 0);
-  delay(100);
-  Serial.println("Turn with dice is done");
-  Serial.print(cx);
-  //forward(1);
+  delay(50);
+  //  Serial.println(cd);
+  //    exit(0);
+
 }
 
 void closeGrip() {
-  int i = 90;
+  int i = 75;
   int x = 200;
-  while (x > 70) {
+  while (x > 65) {
     tilt.write(x);
     x--;
-    delay(20);
+    delay(10);
   }
 
   forceReading = analogRead(forceSensor);
   while (forceReading > gripThresh) {
     forceReading = analogRead(forceSensor);
+    Serial.println(forceReading);
     i++;
-    grip.write(i);
-    delay(50);
+    int j = i % 200;
+    grip.write(j);
+    delay(20);
   }
+  tilt.write(200);
   Serial.println("OBJECT GRABBED");
 }
 
+void sweep(int lastSide){ 
+  if (lastSide == 0)//left
+  {
+  digitalWrite(leftDirection, LOW);
+  digitalWrite(rightDirection, HIGH);
+  analogWrite(leftSpeed, lSP - turnMod + 5);
+  analogWrite(rightSpeed, rSP - turnMod + 5);
+  delay(delayTLeft);
+  cVal = analogRead(cIRPin);
+  while (cVal < thresh) { //Continue rotating in specified direction until the center line sensor reads the black tape value
+    cVal = analogRead(cIRPin);
+    }
+  }
+  else{
+  digitalWrite(leftDirection, HIGH);
+  digitalWrite(rightDirection, LOW);
+  analogWrite(leftSpeed, lSP - turnMod + 5);
+  analogWrite(rightSpeed, rSP - turnMod + 5);
+  delay(delayTLeft);
+  cVal = analogRead(cIRPin);
+  
+  while (cVal < thresh) { //Continue rotating in specified direction until the center line sensor reads the black tape value
+    cVal = analogRead(cIRPin);
+    }
+  }
+  analogWrite(leftSpeed, 0);
+  analogWrite(rightSpeed, 0);
+}
 
-void approach() {
+
+void dropDice() {
+  analogWrite(leftSpeed, 0);
+  analogWrite(rightSpeed, 0);
+  int x = 200;
+  while (x > 70) {
+    tilt.write(x);
+    x--;
+    if (x == 80) {
+      grip.write(75);
+      Serial.println("Dice Dropped");
+    }
+  }
+}
+
+
+void approachDice() {
   if (cd == 3)
   {
     cx--;
   }
-  if (cd == 0)
+  else if (cd == 0)
   {
     cy++;
   }
-  if (cd == 1)
+  else if (cd == 1)
   {
     cx++;
   }
@@ -356,12 +655,10 @@ void approach() {
   rightBumper = digitalRead(rBump);
   while (leftBumper && rightBumper)
   {
-    Serial.println("looking for wall");
     leftBumper = digitalRead(lBump);
     rightBumper = digitalRead(rBump);
     digitalWrite(leftDirection, HIGH);
     digitalWrite(rightDirection, HIGH);
-    IRVal = analogRead(IRpin);
 
     lVal = analogRead(lIRPin);
     cVal = analogRead(cIRPin);
@@ -369,40 +666,137 @@ void approach() {
 
 
     if ((lVal < thresh) && (cVal > thresh) && (rVal < thresh)) { //SET MOTORS TO DRIVE FORWARD
-      analogWrite(leftSpeed, 110);
-      analogWrite(rightSpeed, 100);
+      analogWrite(leftSpeed, lSP - turnMod);
+      analogWrite(rightSpeed, rSP - turnMod);
     } else if ((lVal > thresh) && (cVal < thresh) && (rVal < thresh)) { //LEANING INTO THE RIGHT...SPEED UP RIGHT MOTOR (CALIBRATE)
-      analogWrite(leftSpeed, 100);
-      analogWrite(rightSpeed, 140);
+      analogWrite(leftSpeed, lSP - turnMod);
+      analogWrite(rightSpeed, rSP - turnMod + 50);
     } else if ((lVal < thresh) && (cVal < thresh) && (rVal > thresh)) { //LEANING INTO THE LEFT...SPEED UP RIGHT MOTOR (CALIBRATE)
-      analogWrite(leftSpeed, 160);
-      analogWrite(rightSpeed, 80);
+      analogWrite(leftSpeed, lSP - turnMod + 50);
+      analogWrite(rightSpeed, rSP - turnMod);
     }
 
   }
-
-  delay(100);
-
   digitalWrite(leftDirection, LOW);
   digitalWrite(rightDirection, LOW);
-
-  if ((lVal < thresh) && (cVal > thresh) && (rVal < thresh)) { //SET MOTORS TO DRIVE FORWARD
-    analogWrite(leftSpeed, 148);
-    analogWrite(rightSpeed, 128);
-  } else if ((lVal > thresh) && (cVal < thresh) && (rVal < thresh)) { //LEANING INTO THE RIGHT...SPEED UP RIGHT MOTOR (CALIBRATE)
-    analogWrite(leftSpeed, 208);
-    analogWrite(rightSpeed, 128);
-  } else if ((lVal < thresh) && (cVal < thresh) && (rVal > thresh)) { //LEANING INTO THE LEFT...SPEED UP RIGHT MOTOR (CALIBRATE)
-    analogWrite(leftSpeed, 108);
-    analogWrite(rightSpeed, 128);
-  }
-  delay(250);
+  analogWrite(leftSpeed, lSP - turnMod);
+  analogWrite(rightSpeed, rSP - turnMod);
+  delay(300);
   analogWrite(leftSpeed, 0);
   analogWrite(rightSpeed, 0);
   closeGrip();
-  Serial.println("Turning with dice");
 
   turnWithDice();
-  Serial.println("Main loop is being called");
 
+  //  if((lVal < thresh) && (cVal > thresh) && (rVal < thresh)){ //SET MOTORS TO DRIVE FORWARD
+  //      analogWrite(leftSpeed, 110);
+  //      analogWrite(rightSpeed, 100);
+  //    }else if((lVal > thresh) && (cVal < thresh) && (rVal < thresh)){//LEANING INTO THE RIGHT...SPEED UP RIGHT MOTOR (CALIBRATE)
+  //      analogWrite(leftSpeed, 160);
+  //      analogWrite(rightSpeed, 80);
+  //    }else if((lVal < thresh) && (cVal < thresh) && (rVal > thresh)){//LEANING INTO THE LEFT...SPEED UP RIGHT MOTOR (CALIBRATE)
+  //      analogWrite(leftSpeed, 100);
+  //      analogWrite(rightSpeed, 140);
+  //    }
+  //  delay(1000);
+
+}
+
+void approachBin() {
+  IRVal = analogRead(IRpin);
+  leftBumper = digitalRead(lBump);
+  rightBumper = digitalRead(rBump);
+  while (leftBumper && rightBumper)
+  {
+    leftBumper = digitalRead(lBump);
+    rightBumper = digitalRead(rBump);
+    digitalWrite(leftDirection, HIGH);
+    digitalWrite(rightDirection, HIGH);
+    IRVal = analogRead(IRpin);
+    lVal = analogRead(lIRPin);
+    cVal = analogRead(cIRPin);
+    rVal = analogRead(rIRPin);
+
+
+    if ((lVal < thresh) && (cVal > thresh) && (rVal < thresh)) { //SET MOTORS TO DRIVE FORWARD
+      analogWrite(leftSpeed, lSP);
+      analogWrite(rightSpeed, rSP);
+    } else if ((lVal > thresh) && (cVal < thresh) && (rVal < thresh)) { //LEANING INTO THE RIGHT...SPEED UP RIGHT MOTOR (CALIBRATE)
+      analogWrite(leftSpeed, lSP - 80);
+      analogWrite(rightSpeed, rSP - 40);
+    } else if ((lVal < thresh) && (cVal < thresh) && (rVal > thresh)) { //LEANING INTO THE LEFT...SPEED UP RIGHT MOTOR (CALIBRATE)
+      analogWrite(leftSpeed, lSP - 40);
+      analogWrite(rightSpeed, rSP - 80);
+    }
+  }
+
+  dropDice();
+  Serial.println("dice dropped");
+  digitalWrite(leftDirection, LOW);
+  digitalWrite(rightDirection, LOW);
+  analogWrite(leftSpeed, lSP - 40);
+  analogWrite(rightSpeed, rSP - 40);
+  delay(800);
+  Serial.println("went back");
+  analogWrite(leftSpeed, lSP - turnMod + 5);
+  analogWrite(rightSpeed, rSP - turnMod + 5);
+  digitalWrite(leftDirection, LOW);
+  digitalWrite(rightDirection, HIGH);
+  delay(delayTLeft);
+  cVal = analogRead(cIRPin);
+  while (cVal < thresh) { //Continue rotating in specified direction until the center line sensor reads the black tape value
+    cVal = analogRead(cIRPin);
+    if ((cVal > thresh) && (pcVal > thresh)) { //At an intersection. Increment intersection counter
+      if ((millis() - lastInter) > 100) {
+        analogWrite(leftSpeed, 0);
+        analogWrite(rightSpeed, 0);
+        lastInter = millis();
+
+      }
+    }
+    pcVal = cVal;
+  }
+  //  analogWrite(leftSpeed, lSP - turnMod - resetTMod);
+  //  analogWrite(rightSpeed, rSP - turnMod - resetTMod);
+  //  digitalWrite(leftDirection, HIGH);
+  //  digitalWrite(rightDirection, LOW);
+  //  delay(1000);
+  //  cVal = analogRead(cIRPin);
+  //  while (cVal < thresh) { //Continue rotating in specified direction until the center line sensor reads the black tape value
+  //    cVal = analogRead(cIRPin);
+  //    digitalWrite(leftDirection, HIGH);
+  //    digitalWrite(rightDirection, LOW);
+  //    analogWrite(leftSpeed, lSP - turnMod - resetTMod);
+  //    analogWrite(rightSpeed, rSP - turnMod - resetTMod);
+  //  }
+  //  digitalWrite(leftDirection, LOW);
+  //  digitalWrite(rightDirection, HIGH);
+  //  analogWrite(leftSpeed, lSP);
+  //  analogWrite(rightSpeed, rSP);
+  //  delay(100);
+  digitalWrite(leftDirection, HIGH);
+  digitalWrite(rightDirection, HIGH);
+  unsigned long timer = millis();
+  while ((millis() - timer) < turnADPD) {
+    if ((lVal < thresh) && (cVal > thresh) && (rVal < thresh)) { //SET MOTORS TO DRIVE FORWARD
+      analogWrite(leftSpeed, lSP);
+      analogWrite(rightSpeed, rSP);
+    } else if (((lVal > thresh) && (cVal < thresh) && (rVal < thresh)) || ((lVal > thresh) && (cVal > thresh) && (rVal < thresh))) { //LEANING INTO THE RIGHT...SPEED UP RIGHT MOTOR (CALIBRATE)
+      analogWrite(leftSpeed, lSP - 80);
+      analogWrite(rightSpeed, rSP);
+    } else if ((lVal < thresh) && (cVal < thresh) && (rVal > thresh) || ((lVal < thresh) && (cVal > thresh) && (rVal > thresh))) { //LEANING INTO THE LEFT...SPEED UP RIGHT MOTOR (CALIBRATE)
+      analogWrite(leftSpeed, lSP);
+      analogWrite(rightSpeed, rSP - 80);
+    } else {
+      analogWrite(leftSpeed, lSP - 30);
+      analogWrite(rightSpeed, rSP - 30);
+    }
+
+  }
+  analogWrite(leftSpeed, 0);
+  analogWrite(rightSpeed, 0);
+  cd = 0;
+  delay(50);
+  tilt.write(200);
+  delay(50);
 }
