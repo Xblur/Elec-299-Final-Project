@@ -14,12 +14,12 @@ int dIn;
 int delayTLeft = 600; //500 when half bat 400 when full bat
 int delayTRight = 600; //500 when half bat 400 when full bat
 int delayBeforeT = 200; // 350 when half 250 when full
-int lSP = 200;
-int rSP = 190;
-int turnMod = 90; // 80 when half 90 when full
+int lSP = 210;
+int rSP = 200;
+int turnMod = 80; // 80 when half 90 when full
 int resetTMod = 10; // subtracts from turn speed after drop dice. 10 when full -10 when half;
 int turnADPD = 150; // 150 when full 200 when half
-int intersectMilli = 120; // 130 full 180 low
+int intersectMilli = 80; // 130 full 180 low
 
 int leftBumper = 1;
 int rightBumper = 1;
@@ -97,43 +97,45 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   Serial.println("BEGINING LOOP()");
-  xIn = 4;
-  yIn = 5;
-  dIn = 0;
-  GoToDice(xIn, yIn, dIn);
-  approachDice();
-  GoToBin(type);
-  approachBin();
-
-
-  xIn = 1;
-  yIn = 4;
-  dIn = 3;
-  GoToDice(xIn, yIn, dIn);
-  approachDice();
-  GoToBin(type);
-  approachBin();
-  xIn = 5;
-  yIn = 5;
-  dIn = 0;
-  GoToDice(xIn, yIn, dIn);
-  approachDice();
-  GoToBin(type);
-  approachBin();
-  xIn = 5;
-  yIn = 2;
-  dIn = 1;
-  GoToDice(xIn, yIn, dIn);
-  approachDice();
-  GoToBin(type);
-  approachBin();
-  xIn = 5;
-  yIn = 3;
-  dIn = 1;
-  GoToDice(xIn, yIn, dIn);
-  approachDice();
-  GoToBin(type);
-  approachBin();
+  turn(1);
+  delay(10000);
+  //  xIn = 4;
+  //  yIn = 5;
+  //  dIn = 0;
+  //  GoToDice(xIn, yIn, dIn);
+  //  approachDice();
+  //  GoToBin(type);
+  //  approachBin();
+  //
+  //
+  //  xIn = 1;
+  //  yIn = 4;
+  //  dIn = 3;
+  //  GoToDice(xIn, yIn, dIn);
+  //  approachDice();
+  //  GoToBin(type);
+  //  approachBin();
+  //  xIn = 5;
+  //  yIn = 5;
+  //  dIn = 0;
+  //  GoToDice(xIn, yIn, dIn);
+  //  approachDice();
+  //  GoToBin(type);
+  //  approachBin();
+  //  xIn = 5;
+  //  yIn = 2;
+  //  dIn = 1;
+  //  GoToDice(xIn, yIn, dIn);
+  //  approachDice();
+  //  GoToBin(type);
+  //  approachBin();
+  //  xIn = 5;
+  //  yIn = 3;
+  //  dIn = 1;
+  //  GoToDice(xIn, yIn, dIn);
+  //  approachDice();
+  //  GoToBin(type);
+  //  approachBin();
   exit(0);
 }
 
@@ -372,7 +374,7 @@ void forward(int numOfIntersections) {
         intersectionCount++;
         Serial.println(intersectionCount);
         lastInter = millis();
-
+        delay(150);
       }
     }
     plVal = lVal;
@@ -394,7 +396,6 @@ void turn(int dir) {
   digitalWrite(rightDirection, HIGH);
   delay(delayBeforeT);
 
-
   if (dir == 1) { //Begin turning counter-clockwise to ensure that center line sensor is not scaning the black tape
     analogWrite(leftSpeed, lSP - turnMod);
     analogWrite(rightSpeed, rSP - turnMod);
@@ -402,18 +403,15 @@ void turn(int dir) {
     digitalWrite(rightDirection, HIGH);
     delay(delayTLeft);
     cVal = analogRead(cIRPin);
-    while (cVal < thresh) { //Continue rotating in specified direction until the center line sensor reads the black tape value
-      cVal = analogRead(cIRPin);
-      if ((cVal > thresh) && (pcVal > thresh)) { //At an intersection. Increment intersection counter
-        if ((millis() - lastInter) > 100) {
-          analogWrite(leftSpeed, 0);
-          analogWrite(rightSpeed, 0);
-          lastInter = millis();
-
-        }
-      }
+    pcVal = 0;
+    while (cVal < thresh && pcVal < thresh) {
       pcVal = cVal;
+      delay(20);
+      cVal = analogRead(cIRPin);
     }
+    analogWrite(leftSpeed, 0);
+    analogWrite(rightSpeed, 0);
+    delay(100);
     if (cd == 0) { //Update direction robot is facing
       cd = 3;
     } else {
@@ -428,79 +426,61 @@ void turn(int dir) {
     digitalWrite(rightDirection, LOW);
     delay(delayTRight);
     cVal = analogRead(cIRPin);
-    while (cVal < thresh) { //Continue rotating in specified direction until the center line sensor reads the black tape value
-      cVal = analogRead(cIRPin);
-      if ((cVal > thresh) && (pcVal > thresh)) { //At an intersection. Increment intersection counter
-        if ((millis() - lastInter) > 100) {
-          analogWrite(leftSpeed, 0);
-          analogWrite(rightSpeed, 0);
-          lastInter = millis();
-        }
-      }
+    pcVal = 0;
+    while (cVal < thresh && pcVal < thresh) {
       pcVal = cVal;
+      delay(20);
+      cVal = analogRead(cIRPin);
     }
+    analogWrite(leftSpeed, 0);
+    analogWrite(rightSpeed, 0);
+    delay(100);
     cd = (cd + 1) % 4; //Update direction robot is facing
   }
 
-  if (dir == 1) {
+  //  if (dir == 1) {
+  //    digitalWrite(leftDirection, LOW);
+  //    digitalWrite(rightDirection, HIGH);
+  //    analogWrite(leftSpeed, lSP - turnMod);
+  //    analogWrite(rightSpeed, rSP - turnMod);
+  //  } else {
+  //    digitalWrite(leftDirection, HIGH);
+  //    digitalWrite(rightDirection, LOW);
+  //    analogWrite(leftSpeed, lSP - turnMod);
+  //    analogWrite(rightSpeed, rSP - turnMod);
+  //  }
+  Serial.println("sweep");
+  lVal = analogRead(lIRPin);
+  cVal = analogRead(cIRPin);
+  rVal = analogRead(rIRPin);
+  delay(100);
+  if (cVal < thresh) {
+    sweep(dir);
+  }
+  analogWrite(leftSpeed, 0);
+  analogWrite(rightSpeed, 0);
+}
+
+void sweep(int lastSide) {
+  if (lastSide == 0)//left
+  {
     digitalWrite(leftDirection, LOW);
     digitalWrite(rightDirection, HIGH);
-    analogWrite(leftSpeed, lSP - turnMod);
-    analogWrite(rightSpeed, rSP - turnMod);
-  } else {
-    digitalWrite(leftDirection, HIGH);
-    digitalWrite(rightDirection, LOW);
-    analogWrite(leftSpeed, lSP - turnMod);
-    analogWrite(rightSpeed, rSP - turnMod);
-  }
-
-  if (dir = 1) {
+    analogWrite(leftSpeed, lSP - turnMod + 5);
+    analogWrite(rightSpeed, rSP - turnMod + 5);
     cVal = analogRead(cIRPin);
-    if (cVal < (thresh)) {
-      while (cVal < (thresh)) {
-        cVal = analogRead(cIRPin);
-        digitalWrite(leftDirection, HIGH);
-        digitalWrite(rightDirection, LOW);
-        analogWrite(leftSpeed, lSP - turnMod);
-        analogWrite(rightSpeed, rSP - turnMod);
-        while (cVal < thresh) { //Continue rotating in specified direction until the center line sensor reads the black tape value
-          cVal = analogRead(cIRPin);
-          if ((cVal > thresh) && (pcVal > thresh)) { //At an intersection. Increment intersection counter
-            if ((millis() - lastInter) > 100) {
-              analogWrite(leftSpeed, 0);
-              analogWrite(rightSpeed, 0);
-              lastInter = millis();
-
-            }
-          }
-          pcVal = cVal;
-        }
-      }
-
+    while (cVal < thresh) { //Continue rotating in specified direction until the center line sensor reads the black tape value
+      cVal = analogRead(cIRPin);
     }
   }
   else {
+    digitalWrite(leftDirection, HIGH);
+    digitalWrite(rightDirection, LOW);
+    analogWrite(leftSpeed, lSP - turnMod + 5);
+    analogWrite(rightSpeed, rSP - turnMod + 5);
     cVal = analogRead(cIRPin);
-    if (cVal < (thresh)) {
-      while (cVal < (thresh)) {
-        cVal = analogRead(cIRPin);
-        digitalWrite(leftDirection, LOW);
-        digitalWrite(rightDirection, HIGH);
-        analogWrite(leftSpeed, lSP - turnMod);
-        analogWrite(rightSpeed, rSP - turnMod);
-        while (cVal < thresh) { //Continue rotating in specified direction until the center line sensor reads the black tape value
-          cVal = analogRead(cIRPin);
-          if ((cVal > thresh) && (pcVal > thresh)) { //At an intersection. Increment intersection counter
-            if ((millis() - lastInter) > 100) {
-              analogWrite(leftSpeed, 0);
-              analogWrite(rightSpeed, 0);
-              lastInter = millis();
-
-            }
-          }
-          pcVal = cVal;
-        }
-      }
+    while (cVal < thresh) { //Continue rotating in specified direction until the center line sensor reads the black tape value
+      cVal = analogRead(cIRPin);
     }
   }
   analogWrite(leftSpeed, 0);
@@ -518,15 +498,15 @@ void turnWithDice()
       analogWrite(rightSpeed, rSP);
     } else if (((lVal > thresh) && (cVal < thresh) && (rVal < thresh)) || ((lVal > thresh) && (cVal > thresh) && (rVal < thresh))) { //LEANING INTO THE RIGHT...SPEED UP RIGHT MOTOR (CALIBRATE)
       analogWrite(leftSpeed, lSP - 80);
-      analogWrite(rightSpeed, rSP - 20);
+      analogWrite(rightSpeed, rSP );
     } else if ((lVal < thresh) && (cVal < thresh) && (rVal > thresh) || ((lVal < thresh) && (cVal > thresh) && (rVal > thresh))) { //LEANING INTO THE LEFT...SPEED UP RIGHT MOTOR (CALIBRATE)
-      analogWrite(leftSpeed, lSP - 20);
+      analogWrite(leftSpeed, lSP );
       analogWrite(rightSpeed, rSP - 80);
     }
 
   }
-  analogWrite(leftSpeed, lSP - turnMod + 20);
-  analogWrite(rightSpeed, rSP - turnMod + 20);
+  analogWrite(leftSpeed, lSP - turnMod + 10);
+  analogWrite(rightSpeed, rSP - turnMod + 10);
   digitalWrite(leftDirection, HIGH);
   digitalWrite(rightDirection, LOW);
   delay(700);
@@ -537,12 +517,12 @@ void turnWithDice()
   while (cVal < thresh) { //Continue rotating in specified direction until the center line sensor reads the black tape value
     cVal = analogRead(cIRPin);
     if ((cVal > thresh) && (pcVal > thresh)) { //At an intersection. Increment intersection counter
-      if ((millis() - lastInter) > 100) {
+      if ((millis() - lastInter) > 50) {
         analogWrite(leftSpeed, 0);
         analogWrite(rightSpeed, 0);
-        lastInter = millis();
-
+        delay(30);
       }
+      lastInter = millis();
     }
     pcVal = cVal;
   }
@@ -733,12 +713,12 @@ void approachBin() {
   while (cVal < thresh) { //Continue rotating in specified direction until the center line sensor reads the black tape value
     cVal = analogRead(cIRPin);
     if ((cVal > thresh) && (pcVal > thresh)) { //At an intersection. Increment intersection counter
-      if ((millis() - lastInter) > 100) {
+      if ((millis() - lastInter) > 50) {
         analogWrite(leftSpeed, 0);
         analogWrite(rightSpeed, 0);
-        lastInter = millis();
-
+        delay(30);
       }
+      lastInter = millis();
     }
     pcVal = cVal;
   }
